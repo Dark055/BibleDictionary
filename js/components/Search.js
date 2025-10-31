@@ -34,27 +34,24 @@ export class Search {
             />
             
             <!-- Clear button (inside input) -->
-            ${this.query.length > 0 && !this.loading ? `
-              <button
-                id="clear-search"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 
-                       text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            ` : ''}
+            <button
+              id="clear-search"
+              style="display: none;"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 
+                     text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             
             <!-- Loading spinner -->
-            ${this.loading ? `
-              <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div class="relative w-5 h-5">
-                  <div class="absolute inset-0 rounded-full border-2 border-[#B35441]/20"></div>
-                  <div class="absolute inset-0 rounded-full border-2 border-[#B35441] border-t-transparent animate-spin"></div>
-                </div>
+            <div id="loading-spinner" style="display: none;" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div class="relative w-5 h-5">
+                <div class="absolute inset-0 rounded-full border-2 border-[#B35441]/20"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-[#B35441] border-t-transparent animate-spin"></div>
               </div>
-            ` : ''}
+            </div>
           </div>
           
           <!-- Search Button with Icon -->
@@ -72,28 +69,25 @@ export class Search {
         </div>
 
         <!-- Search hints -->
-        ${this.query.length === 0 && !this.showResults ? `
-          <div class="mt-3 flex items-center justify-center gap-2 text-xs text-gray-500">
-            <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
-                         hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
-                  data-hint="любовь">любовь</span>
-            <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
-                         hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
-                  data-hint="надежда">надежда</span>
-            <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
-                         hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
-                  data-hint="вера">вера</span>
-          </div>
-        ` : ''}
+        <div id="search-hints" class="mt-3 flex items-center justify-center gap-2 text-xs text-gray-500">
+          <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
+                       hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
+                data-hint="любовь">любовь</span>
+          <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
+                       hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
+                data-hint="надежда">надежда</span>
+          <span class="px-3 py-1.5 bg-[#F5F1E8] rounded-lg font-medium cursor-pointer 
+                       hover:bg-[#8A9B69] hover:text-white transition-all duration-200" 
+                data-hint="вера">вера</span>
+        </div>
 
         <!-- Search results -->
-        <div id="search-results" style="display: ${this.showResults ? 'block' : 'none'};">
-          ${this.renderResults()}
-        </div>
+        <div id="search-results" style="display: none;"></div>
       </div>
     `;
     
     this.attachEvents();
+    this.updateUI();
   }
   
   renderResults() {
@@ -191,23 +185,52 @@ export class Search {
     `;
   }
   
+  updateUI() {
+    const input = this.container.querySelector('#search-input');
+    const clearBtn = this.container.querySelector('#clear-search');
+    const spinner = this.container.querySelector('#loading-spinner');
+    const hints = this.container.querySelector('#search-hints');
+    const resultsContainer = this.container.querySelector('#search-results');
+    
+    if (input) {
+      input.value = this.query;
+    }
+    
+    if (clearBtn) {
+      clearBtn.style.display = (this.query.length > 0 && !this.loading) ? 'block' : 'none';
+    }
+    
+    if (spinner) {
+      spinner.style.display = this.loading ? 'block' : 'none';
+    }
+    
+    if (hints) {
+      hints.style.display = (this.query.length === 0 && !this.showResults) ? 'flex' : 'none';
+    }
+    
+    if (resultsContainer) {
+      resultsContainer.style.display = this.showResults ? 'block' : 'none';
+      resultsContainer.innerHTML = this.renderResults();
+      this.attachResultsEvents();
+    }
+  }
+  
   attachEvents() {
     const input = this.container.querySelector('#search-input');
     if (input) {
-      input.value = this.query;
       input.addEventListener('input', (e) => {
         this.query = e.target.value;
         if (this.query.length < 2) {
           this.results = [];
           this.showResults = false;
-          this.render();
         }
+        this.updateUI();
       });
       
       input.addEventListener('focus', () => {
         if (this.results.length > 0) {
           this.showResults = true;
-          this.render();
+          this.updateUI();
         }
       });
       
@@ -219,12 +242,11 @@ export class Search {
           }
         } else if (e.key === 'Escape') {
           this.showResults = false;
-          this.render();
+          this.updateUI();
         }
       });
     }
     
-    // Search button
     const searchBtn = this.container.querySelector('#search-button');
     if (searchBtn) {
       searchBtn.addEventListener('click', () => {
@@ -234,27 +256,49 @@ export class Search {
       });
     }
     
-    // Clear button
     const clearBtn = this.container.querySelector('#clear-search');
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         this.query = '';
         this.results = [];
         this.showResults = false;
-        this.render();
+        this.updateUI();
+        const input = this.container.querySelector('#search-input');
+        if (input) input.focus();
       });
     }
     
-    // Close results button
+    const hints = this.container.querySelectorAll('[data-hint]');
+    hints.forEach(hint => {
+      hint.addEventListener('click', () => {
+        this.query = hint.dataset.hint;
+        const input = this.container.querySelector('#search-input');
+        if (input) {
+          input.value = this.query;
+          input.focus();
+        }
+        this.updateUI();
+        this.performSearch();
+      });
+    });
+    
+    if (!this.clickOutsideHandler) {
+      this.clickOutsideHandler = this.handleClickOutside.bind(this);
+      setTimeout(() => {
+        document.addEventListener('click', this.clickOutsideHandler);
+      }, 100);
+    }
+  }
+  
+  attachResultsEvents() {
     const closeBtn = this.container.querySelector('#close-results');
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         this.showResults = false;
-        this.render();
+        this.updateUI();
       });
     }
     
-    // Result items
     const resultItems = this.container.querySelectorAll('.result-item');
     resultItems.forEach(item => {
       item.addEventListener('click', () => {
@@ -264,24 +308,6 @@ export class Search {
         window.location.href = `read.html?book=${book}&chapter=${chapter}#v${verse}`;
       });
     });
-    
-    // Search hints
-    const hints = this.container.querySelectorAll('[data-hint]');
-    hints.forEach(hint => {
-      hint.addEventListener('click', () => {
-        this.query = hint.dataset.hint;
-        this.render();
-        this.performSearch();
-      });
-    });
-    
-    // Click outside to close (только один раз)
-    if (!this.clickOutsideHandler) {
-      this.clickOutsideHandler = this.handleClickOutside.bind(this);
-      setTimeout(() => {
-        document.addEventListener('click', this.clickOutsideHandler);
-      }, 100);
-    }
   }
   
   handleClickOutside(event) {
@@ -289,26 +315,23 @@ export class Search {
     if (wrapper && !wrapper.contains(event.target)) {
       if (this.showResults) {
         this.showResults = false;
-        this.render();
+        this.updateUI();
       }
     }
   }
   
   async performSearch() {
     this.loading = true;
-    this.render();
+    this.updateUI();
     
     try {
-      // Если API доступен, используем его
       if (API_BASE_URL) {
         const data = await searchBible(this.query);
         this.results = data.results || [];
         this.searchType = data.type;
       } else {
-        // Иначе используем локальный поиск
         const verses = searchVerses(this.query, 50);
         
-        // Добавляем подсветку найденного текста
         const query = this.query.toLowerCase();
         this.results = verses.map(verse => {
           const text = verse.text;
@@ -323,7 +346,6 @@ export class Search {
             if (start > 0) snippet = '...' + snippet;
             if (end < text.length) snippet = snippet + '...';
             
-            // Подсветка
             const highlightedSnippet = snippet.replace(
               new RegExp(this.query, 'gi'),
               match => `<mark class="bg-amber-200 font-semibold">${match}</mark>`
@@ -348,7 +370,7 @@ export class Search {
       this.showResults = true;
     } finally {
       this.loading = false;
-      this.render();
+      this.updateUI();
     }
   }
   
