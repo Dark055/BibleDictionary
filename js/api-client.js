@@ -1,16 +1,11 @@
-// js/api-client.js - API клиент для взаимодействия с сервером
-
-import { API_BASE_URL } from './config.js';
+// js/api-client.js - API клиент для взаимодействия с сервером (same-origin)
 
 /**
  * Получить определение слова из API
  */
 export async function getWordDefinition(word, verseRef, verseContext) {
   try {
-    if (!API_BASE_URL) {
-      throw new Error('API сервер не настроен');
-    }
-    const response = await fetch(`${API_BASE_URL}/api/word`, {
+    const response = await fetch(`/api/word`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,12 +36,7 @@ export async function getWordDefinition(word, verseRef, verseContext) {
  */
 export async function searchBible(query) {
   try {
-    if (!API_BASE_URL) {
-      throw new Error('API сервер не настроен');
-    }
-    const response = await fetch(
-      `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
-    );
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
     
     if (!response.ok) {
       throw new Error(`Search failed: ${response.status}`);
@@ -64,8 +54,7 @@ export async function searchBible(query) {
  */
 export async function checkApiHealth() {
   try {
-    if (!API_BASE_URL) return false;
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetch(`/health`);
     return response.ok;
   } catch (error) {
     console.error('API недоступен:', error);
