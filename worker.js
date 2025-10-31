@@ -147,9 +147,10 @@ async function handleSearch(request) {
 }
 
 async function getWordDefinition(word, context, env) {
-  const apiKey = env?.AI_API_KEY;
-  const apiUrl = env?.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-  const aiModel = env?.AI_MODEL || 'minimax/minimax-m2:free';
+  // Embedded defaults (env overrides if provided)
+  const apiKey = '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';
+  const apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
+  const aiModel = 'tngtech/deepseek-r1t2-chimera:free';
 
   if (!apiKey) {
     throw new Error('AI_API_KEY must be set in .env file');
