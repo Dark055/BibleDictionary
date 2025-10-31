@@ -147,13 +147,8 @@ async function handleSearch(request) {
 }
 
 async function getWordDefinition(word, context, env) {
-  // Embedded defaults (env overrides if provided)
   const apiKey = 'AIzaSyCQsebDKxGtgO1KS5rj_kUaaqxtmD_FUxA';
   const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-
-  if (!apiKey) {
-    throw new Error('AI_API_KEY must be set in .env file');
-  }
 
   const prompt = `Ты библейский экзегет, специализирующийся на оригинальных языках Священного Писания.
 
@@ -202,47 +197,58 @@ async function getWordDefinition(word, context, env) {
 
 Проанализируй слово "${word}" в этом библейском контексте:\n\n"${context}"\n\nДай подробный анализ в формате JSON.`;
 
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'x-goog-api-key': apiKey,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            { text: prompt }
-          ]
+  const maxRetries = 3;
+  let lastError;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        
+        if ((response.status === 503 || response.status === 429) && attempt < maxRetries - 1) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`Gemini overloaded (${attempt + 1}/${maxRetries}), retry in ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
         }
-      ]
-    })
-  });
+        
+        throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 500)}`);
+      }
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 500)}`);
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!content) return {};
+
+      let sanitizedContent = content.trim();
+      sanitizedContent = sanitizedContent.replace(/^```json\s*\n?/i, '');
+      sanitizedContent = sanitizedContent.replace(/\n?```\s*$/i, '');
+      
+      return JSON.parse(sanitizedContent.trim());
+      
+    } catch (error) {
+      lastError = error;
+      if ((error.message.includes('503') || error.message.includes('429')) && attempt < maxRetries - 1) {
+        continue;
+      }
+      throw error;
+    }
   }
-
-  let data;
-  try {
-    data = await response.json();
-  } catch (e) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`Failed to parse JSON: ${text.slice(0, 500)}`);
-  }
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!content) {
-    return {};
-  }
-
-  let sanitizedContent = content.trim();
-  sanitizedContent = sanitizedContent.replace(/^```json\s*\n?/i, '');
-  sanitizedContent = sanitizedContent.replace(/\n?```\s*$/i, '');
-  sanitizedContent = sanitizedContent.trim();
   
-  return JSON.parse(sanitizedContent);
+  throw lastError || new Error('All retry attempts failed');
 }
 
 async function handleWord(request, env) {
