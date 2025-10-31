@@ -148,29 +148,14 @@ async function handleSearch(request) {
 
 async function getWordDefinition(word, context, env) {
   // Embedded defaults (env overrides if provided)
-  const apiKey = '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';
-  const apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
-  const aiModel = 'tngtech/deepseek-r1t2-chimera:free';
+  const apiKey = 'AIzaSyCQsebDKxGtgO1KS5rj_kUaaqxtmD_FUxA';
+  const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
   if (!apiKey) {
     throw new Error('AI_API_KEY must be set in .env file');
   }
 
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://bible-app.pages.dev',
-      'X-Title': 'Bible App'
-    },
-    body: JSON.stringify({
-      model: aiModel,
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content: `Ты библейский экзегет, специализирующийся на оригинальных языках Священного Писания.
+  const prompt = `Ты библейский экзегет, специализирующийся на оригинальных языках Священного Писания.
 
 Твоя задача - анализировать библейские слова в контексте стиха.
 
@@ -213,11 +198,22 @@ async function getWordDefinition(word, context, env) {
     "intermediate": "Объяснение для изучающих НА РУССКОМ",
     "academic": "Академическое объяснение НА РУССКОМ"
   }
-}`
-        },
+}
+
+Проанализируй слово "${word}" в этом библейском контексте:\n\n"${context}"\n\nДай подробный анализ в формате JSON.`;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'x-goog-api-key': apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: [
         {
-          role: 'user',
-          content: `Проанализируй слово "${word}" в этом библейском контексте:\n\n"${context}"\n\nДай подробный анализ в формате JSON.`
+          parts: [
+            { text: prompt }
+          ]
         }
       ]
     })
@@ -225,7 +221,7 @@ async function getWordDefinition(word, context, env) {
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    throw new Error(`OpenRouter API error ${response.status}: ${text.slice(0, 500)}`);
+    throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 500)}`);
   }
 
   let data;
@@ -235,7 +231,7 @@ async function getWordDefinition(word, context, env) {
     const text = await response.text().catch(() => '');
     throw new Error(`Failed to parse JSON: ${text.slice(0, 500)}`);
   }
-  const content = data.choices?.[0]?.message?.content;
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!content) {
     return {};
