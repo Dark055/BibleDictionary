@@ -47,13 +47,7 @@ router.post('/', async (req, res) => {
     const newDefinition = {
       word: word.toLowerCase(),
       verse_ref: verseRef,
-      basic_meaning: aiDefinition.basic_meaning || '',
-      context_meaning: aiDefinition.context_meaning || '',
       greek_hebrew: aiDefinition.greek_hebrew,
-      theological_weight: aiDefinition.theological_weight,
-      doctrinal_themes: Array.isArray(aiDefinition.doctrinal_themes) ? aiDefinition.doctrinal_themes : undefined,
-      connections: Array.isArray(aiDefinition.connections) ? aiDefinition.connections : [],
-      cross_references: Array.isArray(aiDefinition.cross_references) ? aiDefinition.cross_references : undefined,
       explanations: aiDefinition.explanations,
       ai_generated: true,
       verified: false,

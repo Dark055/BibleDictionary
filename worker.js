@@ -150,42 +150,24 @@ async function getWordDefinition(word, context, env) {
   const apiKey = 'AIzaSyCQsebDKxGtgO1KS5rj_kUaaqxtmD_FUxA';
   const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
-  const prompt = `Ты библейский экзегет, специализирующийся на оригинальных языках Священного Писания.
+  const prompt = `Проанализируй слово "${word}" в контексте: "${context}"
 
-Твоя задача - анализировать библейские слова в контексте стиха.
-
-ВСЕ ОПИСАНИЯ И ОБЪЯСНЕНИЯ ДОЛЖНЫ БЫТЬ НА РУССКОМ ЯЗЫКЕ.
-
-Отвечай СТРОГО в формате JSON (без markdown, без комментариев):
+Ответь JSON (без markdown):
 {
-  "basic_meaning": "Простое объяснение для начинающего (1-2 предложения НА РУССКОМ)",
-  "context_meaning": "Как это слово функционирует конкретно в данном стихе (2-3 предложения НА РУССКОМ)",
   "greek_hebrew": {
-    "word": "оригинальное слово (греческое/еврейское)",
-    "transliteration": "транслитерация латинскими буквами",
-    "strongs_number": "H1234 или G5678",
-    "root": "корень слова НА РУССКОМ",
-    "literal_meaning": "буквальное значение корня НА РУССКОМ"
+    "word": "оригинальное слово",
+    "transliteration": "транслитерация",
+    "strongs_number": "H/G номер",
+    "root": "корень",
+    "literal_meaning": "буквальное значение"
   },
-  "theological_weight": "low/medium/high",
-  "doctrinal_themes": ["спасение", "благодать"...],
-  "connections": ["связанное слово 1", "связанное слово 2"...],
-  "cross_references": [
-    {
-      "book": 1,
-      "chapter": 1,
-      "verse": 1,
-      "relevance": "типология / цитата / параллель"
-    }
-  ],
   "explanations": {
-    "basic": "Объяснение для начинающих НА РУССКОМ",
-    "intermediate": "Объяснение для изучающих НА РУССКОМ",
-    "academic": "Академическое объяснение НА РУССКОМ"
+    "basic": "Простое объяснение (1-2 предложения)",
+    "intermediate": "Подробное объяснение с контекстом (3-4 предложения)"
   }
 }
 
-Проанализируй слово "${word}" в этом библейском контексте:\n\n"${context}"\n\nДай подробный анализ в формате JSON.`;
+ВСЁ НА РУССКОМ.`;
 
   const maxRetries = 3;
   let lastError;
@@ -287,13 +269,7 @@ async function handleWord(request, env) {
   const newDefinition = {
     word: word.toLowerCase(),
     verse_ref: verseRef,
-    basic_meaning: aiDefinition.basic_meaning || '',
-    context_meaning: aiDefinition.context_meaning || '',
     greek_hebrew: aiDefinition.greek_hebrew,
-    theological_weight: aiDefinition.theological_weight,
-    doctrinal_themes: Array.isArray(aiDefinition.doctrinal_themes) ? aiDefinition.doctrinal_themes : undefined,
-    connections: Array.isArray(aiDefinition.connections) ? aiDefinition.connections : [],
-    cross_references: Array.isArray(aiDefinition.cross_references) ? aiDefinition.cross_references : undefined,
     explanations: aiDefinition.explanations,
     ai_generated: true,
     verified: false,

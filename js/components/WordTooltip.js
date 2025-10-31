@@ -187,15 +187,9 @@ export class WordTooltip {
   
   getExplanationForLevel() {
     if (this.definition.explanations) {
-      return this.definition.explanations[this.complexityLevel] || this.definition.basic_meaning;
+      return this.definition.explanations[this.complexityLevel] || this.definition.explanations.basic || 'Нет описания';
     }
-    
-    // Fallback
-    if (this.complexityLevel === 'basic') {
-      return this.definition.basic_meaning;
-    } else {
-      return this.definition.context_meaning || this.definition.basic_meaning;
-    }
+    return 'Нет описания';
   }
   
   async fetchData() {
