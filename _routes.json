@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "include": [
+    "/api/*",
+    "/health"
+  ],
+  "exclude": [
+    "/css/*",
+    "/js/*",
+    "/data/*",
+    "/*.html",
+    "/*.ico",
+    "/*.png",
+    "/*.jpg",
+    "/*.jpeg",
+    "/*.svg"
+  ]
+}

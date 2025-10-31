@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чтение Библии</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .font-serif { font-family: 'Lora', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="font-sans bg-[#FDFDF8] text-[#2C1810]">
+    <!-- Navigation -->
+    <nav class="bg-[#4A3041] text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="flex items-center space-x-3 hover:opacity-80 transition">
+                    <span class="text-3xl">📖</span>
+                    <h1 class="text-2xl font-serif font-bold">Живая Библия</h1>
+                </a>
+                <div id="navigation-container" class="flex items-center gap-4">
+                    <!-- Navigation will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="min-h-screen bg-gradient-to-b from-amber-50/50 to-[#FDFDF8]">
+        <div class="container mx-auto px-4 py-12">
+            <!-- Chapter header -->
+            <div class="text-center mb-12">
+                <div class="inline-block mb-4">
+                    <div class="px-6 py-3 bg-[#F5F1E8] rounded-full border-2 border-[#8A9B69] shadow-lg">
+                        <span id="chapter-label" class="text-sm font-semibold text-[#8A9B69]"></span>
+                    </div>
+                </div>
+                <h1 id="book-title" class="text-5xl md:text-6xl font-serif font-extrabold text-[#2C1810] mb-4"></h1>
+                <div class="w-24 h-1 bg-gradient-to-r from-[#B35441] to-[#8A9B69] mx-auto rounded-full"></div>
+            </div>
+            
+            <!-- Bible Reader -->
+            <div id="bible-reader-container" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 md:p-12">
+                <!-- Content will be loaded by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/pages/read.js"></script>
+</body>
+</html>

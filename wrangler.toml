@@ -1,0 +1,10 @@
+name = "bible-app"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "WORDS_KV"
+id = "your_kv_namespace_id"
+
+[build]
+command = "npm run build:css"
