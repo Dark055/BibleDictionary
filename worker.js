@@ -167,16 +167,6 @@ async function getWordDefinition(word, context, env) {
     "root": "корень слова НА РУССКОМ",
     "literal_meaning": "буквальное значение корня НА РУССКОМ"
   },
-  "morphology": {
-    "part_of_speech": "существительное, глагол, прилагательное... НА РУССКОМ",
-    "tense": "настоящее, аорист... НА РУССКОМ",
-    "voice": "действительный, страдательный... НА РУССКОМ",
-    "mood": "изъявительное, повелительное... НА РУССКОМ",
-    "case": "именительный, родительный... НА РУССКОМ",
-    "number": "единственное, множественное... НА РУССКОМ",
-    "gender": "мужской, женский, средний... НА РУССКОМ"
-  },
-  "semantic_field": ["творение", "божественность", "сила"...],
   "theological_weight": "low/medium/high",
   "doctrinal_themes": ["спасение", "благодать"...],
   "connections": ["связанное слово 1", "связанное слово 2"...],
@@ -300,8 +290,6 @@ async function handleWord(request, env) {
     basic_meaning: aiDefinition.basic_meaning || '',
     context_meaning: aiDefinition.context_meaning || '',
     greek_hebrew: aiDefinition.greek_hebrew,
-    morphology: aiDefinition.morphology,
-    semantic_field: Array.isArray(aiDefinition.semantic_field) ? aiDefinition.semantic_field : undefined,
     theological_weight: aiDefinition.theological_weight,
     doctrinal_themes: Array.isArray(aiDefinition.doctrinal_themes) ? aiDefinition.doctrinal_themes : undefined,
     connections: Array.isArray(aiDefinition.connections) ? aiDefinition.connections : [],

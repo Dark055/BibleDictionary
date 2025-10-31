@@ -182,47 +182,6 @@ export class WordTooltip {
           </div>
         </div>
       ` : ''}
-      
-      <!-- Morphology -->
-      ${this.definition.morphology ? `
-        <div class="bg-[#F5F1E8] rounded-xl p-4 border border-[#E5DED1]">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xl">🔤</span>
-            <h4 class="text-base font-bold text-[#4A3041]">Morphology</h4>
-          </div>
-          <div class="text-sm text-[#4A3041] space-y-1">
-            ${this.definition.morphology.part_of_speech ? `
-              <div><span class="font-semibold">part_of_speech:</span> ${escapeHtml(this.definition.morphology.part_of_speech)}</div>
-            ` : ''}
-            ${this.definition.morphology.case ? `
-              <div><span class="font-semibold">case:</span> ${escapeHtml(this.definition.morphology.case)}</div>
-            ` : ''}
-            ${this.definition.morphology.number ? `
-              <div><span class="font-semibold">number:</span> ${escapeHtml(this.definition.morphology.number)}</div>
-            ` : ''}
-            ${this.definition.morphology.gender ? `
-              <div><span class="font-semibold">gender:</span> ${escapeHtml(this.definition.morphology.gender)}</div>
-            ` : ''}
-          </div>
-        </div>
-      ` : ''}
-      
-      <!-- Semantic field -->
-      ${this.definition.semantic_field && this.definition.semantic_field.length > 0 ? `
-        <div class="bg-[#F5F1E8] rounded-xl p-4 border border-[#E5DED1]">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xl">🌐</span>
-            <h4 class="text-base font-bold text-[#4A3041]">Semantic Field</h4>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            ${this.definition.semantic_field.map(field => `
-              <span class="px-3 py-1 bg-[#EDE7DD] text-[#4A3041] text-xs font-medium rounded-full border border-[#E5DED1]">
-                ${escapeHtml(field)}
-              </span>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
     `;
   }
   

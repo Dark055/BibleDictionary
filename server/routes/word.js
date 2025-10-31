@@ -50,8 +50,6 @@ router.post('/', async (req, res) => {
       basic_meaning: aiDefinition.basic_meaning || '',
       context_meaning: aiDefinition.context_meaning || '',
       greek_hebrew: aiDefinition.greek_hebrew,
-      morphology: aiDefinition.morphology,
-      semantic_field: Array.isArray(aiDefinition.semantic_field) ? aiDefinition.semantic_field : undefined,
       theological_weight: aiDefinition.theological_weight,
       doctrinal_themes: Array.isArray(aiDefinition.doctrinal_themes) ? aiDefinition.doctrinal_themes : undefined,
       connections: Array.isArray(aiDefinition.connections) ? aiDefinition.connections : [],
