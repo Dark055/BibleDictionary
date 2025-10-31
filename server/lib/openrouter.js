@@ -3,9 +3,14 @@
 export async function getWordDefinition(word, context) {
   const apiKey = process.env.AI_API_KEY;
   const apiUrl = process.env.AI_API_URL;
+  const aiModel = process.env.AI_MODEL || 'minimax/minimax-m2:free';
 
-  if (!apiKey || !apiUrl) {
-    throw new Error('AI_API_KEY and AI_API_URL must be set in .env file');
+  if (!apiKey) {
+    throw new Error('AI_API_KEY must be set in .env file');
+  }
+  
+  if (!apiUrl) {
+    throw new Error('AI_API_URL must be set in .env file');
   }
 
   const response = await fetch(apiUrl, {
@@ -15,7 +20,7 @@ export async function getWordDefinition(word, context) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'minimax/minimax-m2:free',
+      model: aiModel,
       response_format: { type: 'json_object' },
       messages: [
         {

@@ -148,10 +148,11 @@ async function handleSearch(request) {
 
 async function getWordDefinition(word, context, env) {
   const apiKey = env?.AI_API_KEY;
-  const apiUrl = env?.AI_API_URL || 'https://api.intelligence.io.solutions/api/v1/chat/completions';
+  const apiUrl = env?.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
+  const aiModel = env?.AI_MODEL || 'minimax/minimax-m2:free';
 
   if (!apiKey) {
-    throw new Error('AI_API_KEY must be set in .dev.vars file');
+    throw new Error('AI_API_KEY must be set in .env file');
   }
 
   const response = await fetch(apiUrl, {
@@ -163,7 +164,7 @@ async function getWordDefinition(word, context, env) {
       'X-Title': 'Bible App'
     },
     body: JSON.stringify({
-      model: 'minimax/minimax-m2:free',
+      model: aiModel,
       response_format: { type: 'json_object' },
       messages: [
         {
@@ -222,11 +223,18 @@ async function getWordDefinition(word, context, env) {
   });
 
   if (!response.ok) {
-    throw new Error(`OpenRouter API error: ${response.statusText}`);
+    const text = await response.text().catch(() => '');
+    throw new Error(`OpenRouter API error ${response.status}: ${text.slice(0, 500)}`);
   }
 
-  const data = await response.json();
-  const content = data.choices[0]?.message?.content;
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to parse JSON: ${text.slice(0, 500)}`);
+  }
+  const content = data.choices?.[0]?.message?.content;
 
   if (!content) {
     return {};

@@ -29,10 +29,18 @@ binding = "WORDS_KV"
 id = "вставьте_сюда"
 ```
 
-### 5. Создайте файл с секретами
-Создайте файл `.dev.vars` (для локальной разработки):
+### 5. Настройте переменные окружения
+Создайте файл `.env` на основе `.env.example`:
+```bash
+cp .env .env
 ```
-OPENROUTER_API_KEY=io-v2-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Отредактируйте `.env` и добавьте ваш API ключ:
+```env
+AI_API_KEY=your_openrouter_api_key_here
+AI_API_URL=https://api.intelligence.io.solutions/api/v1/chat/completions
+AI_MODEL=minimax/minimax-m2:free
+PORT=3000
 ```
 
 ### 6. Запустите локально
@@ -47,11 +55,14 @@ npm run dev
 npm run deploy
 ```
 
-### 8. Добавьте секрет в production
+### 8. Добавьте переменные в production
 В [Cloudflare Dashboard](https://dash.cloudflare.com/):
 1. Workers & Pages → ваш проект → Settings
 2. Environment variables → Production
-3. Add variable: `OPENROUTER_API_KEY` = ваш ключ
+3. Add variables:
+   - `AI_API_KEY` = ваш OpenRouter API ключ
+   - `AI_API_URL` = https://api.intelligence.io.solutions/api/v1/chat/completions
+   - `AI_MODEL` = minimax/minimax-m2:free
 
 ## ✅ Готово!
 
@@ -62,7 +73,7 @@ npm run deploy
 - `worker.js` - основной Worker с API логикой
 - `_worker.js` - точка входа для Cloudflare Pages
 - `wrangler.toml` - конфигурация проекта
-- `.dev.vars` - секреты для локальной разработки (не коммитить!)
+- `.env` - переменные окружения для локальной разработки (не коммитить!)
 
 ## 🔄 Обновление приложения
 

@@ -3,7 +3,6 @@
 ## 📋 Чеклист готовности
 
 - [ ] Node.js 18+ установлен
-- [ ] MongoDB запущен (локально или Atlas)
 - [ ] OpenRouter API Key получен
 
 ## 🚀 Команды для запуска
@@ -20,16 +19,16 @@ npm install
 Создайте `.env`:
 
 ```bash
-copy .env.example .env
+copy .env .env
 ```
 
 Откройте `.env` и заполните:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/bible-app
-OPENROUTER_API_KEY=sk-or-v1-ваш-ключ
+AI_API_KEY=your_openrouter_api_key_here
+AI_API_URL=https://api.intelligence.io.solutions/api/v1/chat/completions
+AI_MODEL=minimax/minimax-m2:free
 PORT=3000
-NODE_ENV=development
 ```
 
 **Где взять API Key:**
@@ -70,19 +69,6 @@ http://localhost:8080
 ---
 
 ## 🐛 Быстрое решение проблем
-
-### MongoDB не работает?
-
-```bash
-# Windows
-net start MongoDB
-
-# Mac
-brew services start mongodb-community
-
-# Или используйте Atlas (облачный)
-# https://www.mongodb.com/cloud/atlas
-```
 
 ### CORS ошибка?
 

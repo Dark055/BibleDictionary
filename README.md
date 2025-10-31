@@ -11,9 +11,25 @@ npm install
 
 ### 2. Настройка окружения
 ```bash
-cp .env.example .env
-# Отредактируйте .env файл
+cp .env .env
 ```
+
+Отредактируйте `.env` файл и добавьте необходимые переменные:
+
+```env
+# API Configuration
+AI_API_KEY=your_openrouter_api_key_here
+AI_API_URL=https://api.intelligence.io.solutions/api/v1/chat/completions
+AI_MODEL=minimax/minimax-m2:free
+
+# Server Configuration
+PORT=3000
+```
+
+**Важно**: 
+- `AI_API_KEY` - ключ от OpenRouter API (получите на openrouter.ai)
+- `AI_MODEL` - модель AI для анализа слов (можно изменить на любую доступную модель)
+- Все переменные централизованы в `.env` файле для удобного управления
 
 ### 3. Сборка CSS
 ```bash

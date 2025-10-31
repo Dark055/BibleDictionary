@@ -41,13 +41,15 @@ id = "ваш_реальный_id"
 
 ### 5. Настройка переменных окружения
 
-Создайте секрет для OpenRouter API key:
+Создайте секрет для AI API key:
 
 ```bash
-npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler secret put AI_API_KEY
 ```
 
-Введите ваш API ключ: `io-v2-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...`
+Введите ваш OpenRouter API ключ: `io-v2-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+**Примечание:** Другие переменные (AI_API_URL, AI_MODEL) уже настроены в `wrangler.toml`
 
 ### 6. Деплой проекта
 
@@ -69,8 +71,10 @@ npx wrangler secret put OPENROUTER_API_KEY
    - Build command: `npm run build:css`
    - Build output directory: `/`
    - Root directory: `/`
-7. Environment variables → Add variable:
-   - `OPENROUTER_API_KEY` = ваш ключ
+7. Environment variables → Add variables:
+   - `AI_API_KEY` = ваш OpenRouter API ключ
+   - `AI_API_URL` = https://api.intelligence.io.solutions/api/v1/chat/completions
+   - `AI_MODEL` = minimax/minimax-m2:free
 8. Settings → Functions:
    - KV namespace bindings → Add binding:
      - Variable name: `WORDS_KV`

@@ -3,7 +3,6 @@
 ## Предварительные требования
 
 - **Node.js** версии 18 или выше
-- **MongoDB** (локальный или удаленный)
 - **OpenRouter API Key** (для AI-определений слов)
 
 ## 📦 Шаг 1: Установка зависимостей
@@ -18,16 +17,16 @@ npm install
 Создайте файл `.env` на основе `.env.example`:
 
 ```bash
-copy .env.example .env
+copy .env .env
 ```
 
 Отредактируйте `.env` и укажите свои параметры:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/bible-app
-OPENROUTER_API_KEY=ваш_ключ_api
+AI_API_KEY=your_openrouter_api_key_here
+AI_API_URL=https://api.intelligence.io.solutions/api/v1/chat/completions
+AI_MODEL=minimax/minimax-m2:free
 PORT=3000
-NODE_ENV=development
 ```
 
 ### Получение OpenRouter API Key
@@ -37,41 +36,7 @@ NODE_ENV=development
 3. Создайте новый ключ
 4. Скопируйте его в `.env`
 
-## 🗄️ Шаг 3: MongoDB
-
-### Локальная установка MongoDB
-
-**Windows:**
-```bash
-# Скачайте MongoDB Community Server
-# https://www.mongodb.com/try/download/community
-
-# После установки запустите службу
-net start MongoDB
-```
-
-**Linux/Mac:**
-```bash
-# Установка через package manager
-brew install mongodb-community  # Mac
-sudo apt install mongodb         # Ubuntu/Debian
-
-# Запуск
-brew services start mongodb-community  # Mac
-sudo systemctl start mongodb           # Linux
-```
-
-### Или используйте MongoDB Atlas (облачный)
-
-1. Создайте аккаунт на https://www.mongodb.com/cloud/atlas
-2. Создайте бесплатный кластер
-3. Получите строку подключения
-4. Укажите ее в `.env`:
-```env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/bible-app?retryWrites=true&w=majority
-```
-
-## 🎨 Шаг 4: Сборка CSS
+## 🎨 Шаг 3: Сборка CSS
 
 Скомпилируйте TailwindCSS:
 
@@ -85,7 +50,7 @@ npm run build:css
 npm run watch:css
 ```
 
-## 🚀 Шаг 5: Запуск сервера
+## 🚀 Шаг 4: Запуск сервера
 
 ```bash
 npm run server
@@ -99,7 +64,7 @@ npm run dev
 
 Сервер запустится на **http://localhost:3000**
 
-## 🌐 Шаг 6: Открытие веб-приложения
+## 🌐 Шаг 5: Открытие веб-приложения
 
 ### Вариант A: Использовать Live Server (рекомендуется)
 
@@ -145,10 +110,6 @@ live-server --port=8080 --no-browser
 
 ## 🐛 Решение проблем
 
-### Проблема: "MONGODB_URI is not defined"
-
-**Решение:** Убедитесь, что файл `.env` создан и содержит правильные данные
-
 ### Проблема: "CORS error"
 
 **Решение:** 
@@ -158,8 +119,8 @@ live-server --port=8080 --no-browser
 ### Проблема: "Failed to fetch definition"
 
 **Решение:**
-- Проверьте OpenRouter API Key в `.env`
-- Проверьте соединение с MongoDB
+- Проверьте AI_API_KEY в `.env`
+- Убедитесь, что API сервер запущен
 - Посмотрите логи сервера в консоли
 
 ### Проблема: "Bible data not loaded"
@@ -199,7 +160,7 @@ bible-app-vanilla/
 npm install
 
 # 2. Настроить .env
-copy .env.example .env
+copy .env .env
 # Отредактировать .env
 
 # 3. Собрать CSS

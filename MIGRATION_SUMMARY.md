@@ -183,7 +183,7 @@ cd bible-app-vanilla
 npm install
 
 # Настроить .env
-copy .env.example .env
+copy .env .env
 # Отредактировать .env
 
 # Собрать CSS
