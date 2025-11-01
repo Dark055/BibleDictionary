@@ -6,6 +6,27 @@ import { getWordDefinition } from '../lib/openrouter.js';
 
 const router = express.Router();
 
+const memCache = new Map();
+const MAX_CACHE_SIZE = 500;
+
+function getFromMemCache(key) {
+  if (memCache.has(key)) {
+    const value = memCache.get(key);
+    memCache.delete(key);
+    memCache.set(key, value);
+    return value;
+  }
+  return null;
+}
+
+function setToMemCache(key, value) {
+  if (memCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = memCache.keys().next().value;
+    memCache.delete(firstKey);
+  }
+  memCache.set(key, value);
+}
+
 router.post('/', async (req, res) => {
   try {
     const { word, verseRef, verseContext } = req.body;
@@ -16,25 +37,31 @@ router.post('/', async (req, res) => {
       });
     }
     
-    // Connect to MongoDB
+    const cacheKey = `${word.toLowerCase()}:${verseRef}`;
+    
+    const memCached = getFromMemCache(cacheKey);
+    if (memCached) {
+      console.log(`Memory cache hit: ${word} in ${verseRef}`);
+      return res.json(memCached);
+    }
+    
     const client = await getClientPromise();
     const db = client.db('bible-app');
     const collection = db.collection('words');
     
-    // Check if the word already exists in this verse context
     const existing = await collection.findOne({
       word: word.toLowerCase(),
       verse_ref: verseRef
     });
     
     if (existing) {
-      console.log(`Cache hit for word: ${word} in ${verseRef}`);
+      console.log(`DB cache hit: ${word} in ${verseRef}`);
+      setToMemCache(cacheKey, existing);
       return res.json(existing);
     }
     
     console.log(`Cache miss - generating definition for: ${word} in ${verseRef}`);
     
-    // If not, generate a definition using OpenRouter
     const aiDefinition = await getWordDefinition(word, verseContext || '');
     
     if (!aiDefinition) {
@@ -43,7 +70,6 @@ router.post('/', async (req, res) => {
       });
     }
     
-    // Save to the database with proper validation
     const newDefinition = {
       word: word.toLowerCase(),
       verse_ref: verseRef,
@@ -55,6 +81,7 @@ router.post('/', async (req, res) => {
     };
     
     await collection.insertOne(newDefinition);
+    setToMemCache(cacheKey, newDefinition);
     
     console.log(`Definition saved for: ${word}`);
     

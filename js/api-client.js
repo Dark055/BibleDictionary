@@ -1,9 +1,38 @@
 // js/api-client.js - API клиент для взаимодействия с сервером (same-origin)
 
+const CACHE_PREFIX = 'wordDef:';
+
+function getCacheKey(word, verseRef) {
+  return `${CACHE_PREFIX}${word.toLowerCase()}:${verseRef}`;
+}
+
+function getCachedDefinition(word, verseRef) {
+  try {
+    const cached = sessionStorage.getItem(getCacheKey(word, verseRef));
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedDefinition(word, verseRef, data) {
+  try {
+    sessionStorage.setItem(getCacheKey(word, verseRef), JSON.stringify(data));
+  } catch (e) {
+    console.warn('Failed to cache definition:', e);
+  }
+}
+
 /**
  * Получить определение слова из API
  */
 export async function getWordDefinition(word, verseRef, verseContext) {
+  const cached = getCachedDefinition(word, verseRef);
+  if (cached) {
+    console.log(`Client cache hit: ${word} in ${verseRef}`);
+    return cached;
+  }
+
   try {
     const response = await fetch(`/api/word`, {
       method: 'POST',
@@ -24,7 +53,9 @@ export async function getWordDefinition(word, verseRef, verseContext) {
       throw new Error(errorMsg);
     }
 
-    return await response.json();
+    const data = await response.json();
+    setCachedDefinition(word, verseRef, data);
+    return data;
   } catch (error) {
     console.error('API Error (getWordDefinition):', error);
     throw error;
