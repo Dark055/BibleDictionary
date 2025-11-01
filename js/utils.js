@@ -68,6 +68,19 @@ export function escapeHtml(text) {
 }
 
 /**
+ * Escape атрибутов для защиты от XSS
+ */
+export function escapeAttr(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
  * Получить имя книги по номеру
  */
 export function getBookName(bookNumber, books) {

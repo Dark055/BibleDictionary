@@ -320,6 +320,36 @@ export class Search {
     }
   }
   
+  highlightSearchResults(verses, query) {
+    const lowerQuery = query.toLowerCase();
+    return verses.map(verse => {
+      const text = verse.text;
+      const lowerText = text.toLowerCase();
+      const index = lowerText.indexOf(lowerQuery);
+      
+      if (index !== -1) {
+        const start = Math.max(0, index - 20);
+        const end = Math.min(text.length, index + lowerQuery.length + 100);
+        let snippet = text.substring(start, end);
+        
+        if (start > 0) snippet = '...' + snippet;
+        if (end < text.length) snippet = snippet + '...';
+        
+        const highlightedSnippet = snippet.replace(
+          new RegExp(query, 'gi'),
+          match => `<mark class="bg-amber-200 font-semibold">${match}</mark>`
+        );
+        
+        return {
+          ...verse,
+          highlight: highlightedSnippet
+        };
+      }
+      
+      return verse;
+    });
+  }
+  
   async performSearch() {
     this.loading = true;
     this.updateUI();
@@ -331,35 +361,7 @@ export class Search {
         this.searchType = data.type;
       } else {
         const verses = searchVerses(this.query, 50);
-        
-        const query = this.query.toLowerCase();
-        this.results = verses.map(verse => {
-          const text = verse.text;
-          const lowerText = text.toLowerCase();
-          const index = lowerText.indexOf(query);
-          
-          if (index !== -1) {
-            const start = Math.max(0, index - 20);
-            const end = Math.min(text.length, index + query.length + 100);
-            let snippet = text.substring(start, end);
-            
-            if (start > 0) snippet = '...' + snippet;
-            if (end < text.length) snippet = snippet + '...';
-            
-            const highlightedSnippet = snippet.replace(
-              new RegExp(this.query, 'gi'),
-              match => `<mark class="bg-amber-200 font-semibold">${match}</mark>`
-            );
-            
-            return {
-              ...verse,
-              highlight: highlightedSnippet
-            };
-          }
-          
-          return verse;
-        });
-        
+        this.results = this.highlightSearchResults(verses, this.query);
         this.searchType = 'text';
       }
       

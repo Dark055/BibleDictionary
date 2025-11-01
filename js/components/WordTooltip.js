@@ -20,6 +20,13 @@ export class WordTooltip {
     this.isDragging = false;
     this.dragOffset = { x: 0, y: 0 };
     this.tooltipPos = { x: position.x, y: position.y };
+    this.escapeHandler = null;
+    this.outsideClickHandler = null;
+    this.outsideTouchHandler = null;
+    this.closeHandler = null;
+    this.complexityHandlers = [];
+    this.headerMouseDownHandler = null;
+    this.headerTouchStartHandler = null;
     
     this.create();
     this.fetchData();
@@ -234,61 +241,55 @@ export class WordTooltip {
   }
   
   attachEvents() {
-    // Удалить старые обработчики перед добавлением новых
-    if (this.escapeHandler) {
-      document.removeEventListener('keydown', this.escapeHandler);
-    }
-    if (this.outsideClickHandler) {
-      document.removeEventListener('mousedown', this.outsideClickHandler);
-    }
+    this.removeEventListeners();
     
-    // Close button
     const closeBtn = this.tooltipEl.querySelector('#close-tooltip');
     if (closeBtn) {
-      closeBtn.onclick = (e) => {
+      this.closeHandler = (e) => {
         e.stopPropagation();
         this.close();
       };
+      closeBtn.addEventListener('click', this.closeHandler);
     }
     
-    // Complexity level buttons
     const complexityBtns = this.tooltipEl.querySelectorAll('.complexity-btn');
-    complexityBtns.forEach(btn => {
-      btn.onclick = (e) => {
+    this.complexityHandlers = [];
+    complexityBtns.forEach((btn, index) => {
+      const handler = (e) => {
         e.stopPropagation();
         this.complexityLevel = btn.dataset.level;
         this.render();
         this.attachEvents();
       };
+      this.complexityHandlers.push({ btn, handler });
+      btn.addEventListener('click', handler);
     });
     
-    // Dragging - поддержка mouse и touch
     const header = this.tooltipEl.querySelector('#tooltip-header');
     if (header) {
-      // Mouse события
-      header.onmousedown = (e) => {
+      this.headerMouseDownHandler = (e) => {
         if (e.target.closest('#close-tooltip')) {
           return;
         }
         this.startDrag(e);
       };
+      header.addEventListener('mousedown', this.headerMouseDownHandler);
       
-      // Touch события для мобильных
-      header.addEventListener('touchstart', (e) => {
+      this.headerTouchStartHandler = (e) => {
         if (e.target.closest('#close-tooltip')) {
           return;
         }
-        e.preventDefault(); // Предотвратить скролл
+        e.preventDefault();
         const touch = e.touches[0];
         this.startDrag({
           clientX: touch.clientX,
           clientY: touch.clientY,
           preventDefault: () => e.preventDefault()
         });
-      }, { passive: false });
+      };
+      header.addEventListener('touchstart', this.headerTouchStartHandler, { passive: false });
     }
     
-    // Close on Escape
     this.escapeHandler = (e) => {
       if (e.key === 'Escape') {
         this.close();
@@ -296,7 +297,6 @@ export class WordTooltip {
     };
     document.addEventListener('keydown', this.escapeHandler);
     
-    // Click outside to close (mouse и touch)
     this.outsideClickHandler = (e) => {
       if (!this.tooltipEl.contains(e.target)) {
         this.close();
@@ -311,6 +311,44 @@ export class WordTooltip {
       document.addEventListener('mousedown', this.outsideClickHandler);
       document.addEventListener('touchstart', this.outsideTouchHandler);
     }, 100);
+  }
+  
+  removeEventListeners() {
+    if (this.escapeHandler) {
+      document.removeEventListener('keydown', this.escapeHandler);
+      this.escapeHandler = null;
+    }
+    if (this.outsideClickHandler) {
+      document.removeEventListener('mousedown', this.outsideClickHandler);
+      this.outsideClickHandler = null;
+    }
+    if (this.outsideTouchHandler) {
+      document.removeEventListener('touchstart', this.outsideTouchHandler);
+      this.outsideTouchHandler = null;
+    }
+    
+    const closeBtn = this.tooltipEl?.querySelector('#close-tooltip');
+    if (closeBtn && this.closeHandler) {
+      closeBtn.removeEventListener('click', this.closeHandler);
+      this.closeHandler = null;
+    }
+    
+    this.complexityHandlers.forEach(({ btn, handler }) => {
+      btn.removeEventListener('click', handler);
+    });
+    this.complexityHandlers = [];
+    
+    const header = this.tooltipEl?.querySelector('#tooltip-header');
+    if (header) {
+      if (this.headerMouseDownHandler) {
+        header.removeEventListener('mousedown', this.headerMouseDownHandler);
+        this.headerMouseDownHandler = null;
+      }
+      if (this.headerTouchStartHandler) {
+        header.removeEventListener('touchstart', this.headerTouchStartHandler);
+        this.headerTouchStartHandler = null;
+      }
+    }
   }
   
   startDrag(e) {
@@ -415,15 +453,7 @@ export class WordTooltip {
   }
   
   close() {
-    if (this.escapeHandler) {
-      document.removeEventListener('keydown', this.escapeHandler);
-    }
-    if (this.outsideClickHandler) {
-      document.removeEventListener('mousedown', this.outsideClickHandler);
-    }
-    if (this.outsideTouchHandler) {
-      document.removeEventListener('touchstart', this.outsideTouchHandler);
-    }
+    this.removeEventListeners();
     if (this.tooltipEl) {
       this.tooltipEl.style.opacity = '0';
       this.tooltipEl.style.transition = 'opacity 0.2s ease-out';

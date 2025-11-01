@@ -14,22 +14,24 @@ export async function getWordDefinition(word, context) {
     throw new Error('AI_API_URL must be set in .env file');
   }
 
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    agent: httpsAgent,
-    signal: AbortSignal.timeout(20000),
-    body: JSON.stringify({
-      model: aiModel,
-      max_tokens: maxTokens,
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content: `Найди лемму для \"${word}\" в стихе: \"${context}\"
+  let response;
+  try {
+    response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      agent: httpsAgent,
+      signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({
+        model: aiModel,
+        max_tokens: maxTokens,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content: `Найди лемму для \"${word}\" в стихе: \"${context}\"
 
 Язык оригинала:
 • ВЗ — древнееврейский
@@ -52,10 +54,16 @@ export async function getWordDefinition(word, context) {
 }
 
 ВСЁ НА РУССКОМ.`,
-        },
-      ],
-    }),
-  });
+          },
+        ],
+      }),
+    });
+  } catch (error) {
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+      throw new Error('AI API request timeout after 20 seconds');
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     throw new Error(`OpenRouter API error: ${response.statusText}`);

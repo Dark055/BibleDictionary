@@ -1,6 +1,6 @@
 // js/components/BibleReader.js - Компонент отображения стихов
 
-import { escapeHtml } from '../utils.js';
+import { escapeHtml, escapeAttr } from '../utils.js';
 
 export class BibleReader {
   constructor(container, verses, book, chapter) {
@@ -50,7 +50,7 @@ export class BibleReader {
           <!-- Verse text -->
           <div class="flex-1 pt-0.5 sm:pt-1">
             <p class="text-gray-800 leading-relaxed sm:leading-relaxed md:leading-relaxed text-base sm:text-lg md:text-lg verse-text" data-verse-pk="${verse.pk}" style="line-height: 1.7;">
-              ${words.map((word, idx) => `<span class="word md:hover:bg-gradient-to-r md:hover:from-blue-100 md:hover:to-indigo-100 md:hover:text-blue-900 active:bg-gradient-to-r active:from-blue-100 active:to-indigo-100 active:text-blue-900 cursor-pointer px-1 py-0.5 sm:py-1 -mx-1 transition-all duration-200 rounded-md md:hover:shadow-sm inline touch-manipulation" data-word="${escapeHtml(word)}" data-verse-text="${escapeHtml(verse.text)}" data-verse-ref="${this.book}:${this.chapter}:${verse.verse}">${escapeHtml(word)}</span>`).join(' ')}
+              ${words.map((word, idx) => `<span class="word md:hover:bg-gradient-to-r md:hover:from-blue-100 md:hover:to-indigo-100 md:hover:text-blue-900 active:bg-gradient-to-r active:from-blue-100 active:to-indigo-100 active:text-blue-900 cursor-pointer px-1 py-0.5 sm:py-1 -mx-1 transition-all duration-200 rounded-md md:hover:shadow-sm inline touch-manipulation" data-word="${escapeAttr(word)}" data-verse-text="${escapeAttr(verse.text)}" data-verse-ref="${escapeAttr(this.book + ':' + this.chapter + ':' + verse.verse)}">${escapeHtml(word)}</span>`).join(' ')}
             </p>
             
             <!-- Comment -->

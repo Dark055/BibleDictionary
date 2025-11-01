@@ -9,6 +9,32 @@ const router = express.Router();
 const memCache = new Map();
 const MAX_CACHE_SIZE = 500;
 
+function sanitizeInput(input) {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be a string');
+  }
+  return input.replace(/[{}\[\]$]/g, '').trim();
+}
+
+function validateWordInput(word) {
+  const sanitized = sanitizeInput(word);
+  if (sanitized.length === 0 || sanitized.length > 100) {
+    throw new Error('Word must be 1-100 characters');
+  }
+  return sanitized;
+}
+
+function validateVerseRef(verseRef) {
+  const sanitized = sanitizeInput(verseRef);
+  if (!/^[A-Za-zА-Яа-я0-9\s:.-]+$/.test(sanitized)) {
+    throw new Error('Invalid verse reference format');
+  }
+  if (sanitized.length > 50) {
+    throw new Error('Verse reference too long');
+  }
+  return sanitized;
+}
+
 function getFromMemCache(key) {
   if (memCache.has(key)) {
     const value = memCache.get(key);
@@ -37,11 +63,15 @@ router.post('/', async (req, res) => {
       });
     }
     
-    const cacheKey = `${word.toLowerCase()}:${verseRef}`;
+    const sanitizedWord = validateWordInput(word);
+    const sanitizedVerseRef = validateVerseRef(verseRef);
+    const sanitizedContext = verseContext ? sanitizeInput(verseContext).slice(0, 500) : '';
+    
+    const cacheKey = `${sanitizedWord.toLowerCase()}:${sanitizedVerseRef}`;
     
     const memCached = getFromMemCache(cacheKey);
     if (memCached) {
-      console.log(`Memory cache hit: ${word} in ${verseRef}`);
+      console.log(`Memory cache hit: ${sanitizedWord} in ${sanitizedVerseRef}`);
       return res.json(memCached);
     }
     
@@ -50,19 +80,19 @@ router.post('/', async (req, res) => {
     const collection = db.collection('words');
     
     const existing = await collection.findOne({
-      word: word.toLowerCase(),
-      verse_ref: verseRef
+      word: sanitizedWord.toLowerCase(),
+      verse_ref: sanitizedVerseRef
     });
     
     if (existing) {
-      console.log(`DB cache hit: ${word} in ${verseRef}`);
+      console.log(`DB cache hit: ${sanitizedWord} in ${sanitizedVerseRef}`);
       setToMemCache(cacheKey, existing);
       return res.json(existing);
     }
     
-    console.log(`Cache miss - generating definition for: ${word} in ${verseRef}`);
+    console.log(`Cache miss - generating definition for: ${sanitizedWord} in ${sanitizedVerseRef}`);
     
-    const aiDefinition = await getWordDefinition(word, verseContext || '');
+    const aiDefinition = await getWordDefinition(sanitizedWord, sanitizedContext);
     
     if (!aiDefinition) {
       return res.status(500).json({
@@ -71,8 +101,8 @@ router.post('/', async (req, res) => {
     }
     
     const newDefinition = {
-      word: word.toLowerCase(),
-      verse_ref: verseRef,
+      word: sanitizedWord.toLowerCase(),
+      verse_ref: sanitizedVerseRef,
       greek_hebrew: aiDefinition.greek_hebrew,
       explanations: aiDefinition.explanations,
       ai_generated: true,
@@ -83,7 +113,7 @@ router.post('/', async (req, res) => {
     await collection.insertOne(newDefinition);
     setToMemCache(cacheKey, newDefinition);
     
-    console.log(`Definition saved for: ${word}`);
+    console.log(`Definition saved for: ${sanitizedWord}`);
     
     return res.json(newDefinition);
   } catch (error) {
