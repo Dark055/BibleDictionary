@@ -28,9 +28,9 @@ export class Search {
               type="text"
               id="search-input"
               placeholder="Поиск книг, глав, стихов..."
-              class="w-full px-6 py-4 rounded-xl bg-white border-2 border-[#8A9B69] 
+              class="w-full px-4 sm:px-5 md:px-6 py-3 sm:py-4 rounded-xl bg-white border-2 border-[#8A9B69] 
                      focus:border-[#B35441] focus:outline-none 
-                     shadow-lg shadow-black/10 transition duration-300 text-lg"
+                     shadow-lg shadow-black/10 transition duration-300 text-base sm:text-lg"
             />
             
             <!-- Clear button (inside input) -->
@@ -57,9 +57,9 @@ export class Search {
           <!-- Search Button with Icon -->
           <button
             id="search-button"
-            class="px-6 py-4 bg-[#B35441] hover:bg-[#A04432] text-white rounded-xl 
+            class="px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-[#B35441] hover:bg-[#A04432] text-white rounded-xl 
                    transition-all duration-300 shadow-lg hover:shadow-xl 
-                   transform hover:scale-105 flex items-center gap-2 font-semibold"
+                   transform hover:scale-105 flex items-center gap-2 font-semibold min-w-[44px] min-h-[44px] touch-manipulation"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -116,7 +116,7 @@ export class Search {
     
     return `
       <div class="absolute w-full mt-3 bg-white border-2 border-[#8A9B69]/30
-                rounded-xl shadow-2xl max-h-[32rem] overflow-hidden z-50">
+                rounded-xl shadow-2xl max-h-[60vh] sm:max-h-[70vh] md:max-h-[32rem] overflow-hidden z-50">
         <!-- Results header -->
         <div class="px-6 py-3 bg-[#F5F1E8] border-b border-[#8A9B69]/20 sticky top-0">
           <div class="flex items-center justify-between">
@@ -138,7 +138,7 @@ export class Search {
         </div>
 
         <!-- Results list -->
-        <div class="divide-y divide-gray-100 overflow-y-auto max-h-[28rem]">
+        <div class="divide-y divide-gray-100 overflow-y-auto max-h-[calc(60vh-8rem)] sm:max-h-[calc(70vh-8rem)] md:max-h-[28rem]">
           ${this.results.map((verse, idx) => `
             <div
               class="group px-6 py-4 hover:bg-amber-50 cursor-pointer transition-all duration-200 relative result-item"

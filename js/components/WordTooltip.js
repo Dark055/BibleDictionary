@@ -33,20 +33,35 @@ export class WordTooltip {
   }
   
   create() {
+    // Создать backdrop на мобильных
+    const isMobile = window.innerWidth < 768;
+    
+    if (isMobile) {
+      this.backdropEl = document.createElement('div');
+      this.backdropEl.className = 'fixed inset-0 bg-black/50 z-[9998] backdrop-blur-sm';
+      this.backdropEl.style.opacity = '0';
+      this.backdropEl.style.transition = 'opacity 0.2s ease-out';
+      document.body.appendChild(this.backdropEl);
+      
+      // Закрытие по клику на backdrop
+      this.backdropEl.addEventListener('click', () => this.close());
+      
+      requestAnimationFrame(() => {
+        if (this.backdropEl) this.backdropEl.style.opacity = '1';
+      });
+    }
+    
     // Создать контейнер тултипа с простой анимацией
     this.tooltipEl = document.createElement('div');
     this.tooltipEl.className = 'fixed z-[9999]';
     
-    // Определить, мобильное устройство или нет
-    const isMobile = window.innerWidth < 768;
-    
     if (isMobile) {
       // На мобильных: позиционирование по центру экрана, снизу
       this.tooltipPos.x = window.innerWidth / 2;
-      this.tooltipPos.y = window.innerHeight * 0.7; // 70% от высоты экрана
+      this.tooltipPos.y = window.innerHeight * 0.7;
       this.tooltipEl.style.left = '50%';
       this.tooltipEl.style.top = 'auto';
-      this.tooltipEl.style.bottom = '10px';
+      this.tooltipEl.style.bottom = '1rem';
       this.tooltipEl.style.transform = 'translateX(-50%)';
     } else {
       // На десктопе: позиционирование рядом с кликом
@@ -454,6 +469,18 @@ export class WordTooltip {
   
   close() {
     this.removeEventListeners();
+    
+    // Скрыть backdrop на мобильных
+    if (this.backdropEl) {
+      this.backdropEl.style.opacity = '0';
+      setTimeout(() => {
+        if (this.backdropEl && this.backdropEl.parentNode) {
+          this.backdropEl.remove();
+        }
+      }, 200);
+    }
+    
+    // Скрыть tooltip
     if (this.tooltipEl) {
       this.tooltipEl.style.opacity = '0';
       this.tooltipEl.style.transition = 'opacity 0.2s ease-out';

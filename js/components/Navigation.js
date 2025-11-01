@@ -25,9 +25,9 @@ export class Navigation {
       <div class="inline-block bg-white/80 backdrop-blur-sm shadow-md border border-[#E5DED1] rounded-xl w-full max-w-full">
         <div class="px-2 sm:px-3 py-2">
           <!-- Single-line Navigation bar -->
-          <div class="flex items-center justify-center gap-1 sm:gap-2 flex-nowrap overflow-x-auto">
+          <div class="flex items-center justify-center gap-1 sm:gap-2 flex-nowrap overflow-x-auto nav-mobile-compact">
             <!-- Home icon -->
-            <a href="index.html" class="inline-flex items-center justify-center p-2 sm:p-2 rounded-lg text-white bg-[#B35441] hover:bg-[#A04432] active:bg-[#8A3428] transition shadow-sm min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation" title="На главную" aria-label="На главную">
+            <a href="index.html" class="inline-flex items-center justify-center p-2 rounded-lg text-white bg-[#B35441] hover:bg-[#A04432] active:bg-[#8A3428] transition shadow-sm min-w-[44px] min-h-[44px] touch-manipulation" title="На главную" aria-label="На главную">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
@@ -53,7 +53,7 @@ export class Navigation {
             <button
               id="nav-prev-btn"
               ${!hasPrev ? 'disabled' : ''}
-              class="group flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation
+              class="group flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 min-w-[44px] min-h-[44px] touch-manipulation
                 ${hasPrev 
                   ? 'bg-white hover:bg-[#8A9B69] active:bg-[#6d7d54] text-[#2C1810] hover:text-white shadow-md hover:shadow-lg border border-[#8A9B69]/30 hover:border-[#8A9B69] transform hover:-translate-x-1' 
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}"
@@ -69,7 +69,7 @@ export class Navigation {
               <div class="relative flex-1 min-w-0">
                 <select 
                   id="book-select"
-                  class="appearance-none w-full px-2 sm:px-3 py-2 sm:py-1.5 pr-6 sm:pr-8 bg-white border-2 border-[#8A9B69]/30 rounded-lg focus:outline-none focus:border-[#8A9B69] focus:ring-2 sm:focus:ring-4 focus:ring-[#8A9B69]/20 transition-all duration-300 font-medium text-[#2C1810] text-xs sm:text-sm shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-h-[44px] sm:min-h-0"
+                  class="appearance-none w-full px-2 sm:px-3 py-2 sm:py-1.5 pr-6 sm:pr-8 bg-white border-2 border-[#8A9B69]/30 rounded-lg focus:outline-none focus:border-[#8A9B69] focus:ring-2 sm:focus:ring-4 focus:ring-[#8A9B69]/20 transition-all duration-300 font-medium text-[#2C1810] text-xs sm:text-sm shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-h-[44px]"
                 >
                   ${BIBLE_BOOKS.map((book, idx) => `
                     <option value="${idx + 1}" ${idx + 1 === this.currentBook ? 'selected' : ''}>
@@ -87,7 +87,7 @@ export class Navigation {
               <div class="relative flex-shrink-0">
                 <select 
                   id="chapter-select"
-                  class="appearance-none px-2 sm:px-3 py-2 sm:py-1.5 pr-6 sm:pr-8 bg-[#8A9B69] border-2 border-[#8A9B69] rounded-lg focus:outline-none focus:border-[#6d7d54] focus:ring-2 sm:focus:ring-4 focus:ring-[#8A9B69]/20 transition-all duration-300 font-semibold text-white text-xs sm:text-sm shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-w-[70px] sm:min-w-0 min-h-[44px] sm:min-h-0"
+                  class="appearance-none px-2 sm:px-3 py-2 sm:py-1.5 pr-6 sm:pr-8 bg-[#8A9B69] border-2 border-[#8A9B69] rounded-lg focus:outline-none focus:border-[#6d7d54] focus:ring-2 sm:focus:ring-4 focus:ring-[#8A9B69]/20 transition-all duration-300 font-semibold text-white text-xs sm:text-sm shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-w-[80px] sm:min-w-0 min-h-[44px]"
                 >
                   ${Array.from({ length: this.bookInfo.totalChapters }, (_, i) => `
                     <option value="${i + 1}" ${i + 1 === this.currentChapter ? 'selected' : ''}>
@@ -107,7 +107,7 @@ export class Navigation {
             <button
               id="nav-next-btn"
               ${!hasNext ? 'disabled' : ''}
-              class="group flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation
+              class="group flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 min-w-[44px] min-h-[44px] touch-manipulation
                 ${hasNext 
                   ? 'bg-white hover:bg-[#8A9B69] active:bg-[#6d7d54] text-[#2C1810] hover:text-white shadow-md hover:shadow-lg border border-[#8A9B69]/30 hover:border-[#8A9B69] transform hover:translate-x-1' 
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}"

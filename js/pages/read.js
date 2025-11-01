@@ -4,6 +4,7 @@ import { BIBLE_BOOKS } from '../config.js';
 import { getUrlParams, getBookName } from '../utils.js';
 import { loadBibleData, getChapter } from '../bible-data.js';
 import { Navigation } from '../components/Navigation.js';
+import { MobileNavigation } from '../components/MobileNavigation.js';
 import { BibleReader } from '../components/BibleReader.js';
 import { Search } from '../components/Search.js';
 import { WordTooltip } from '../components/WordTooltip.js';
@@ -11,6 +12,7 @@ import { WordTooltip } from '../components/WordTooltip.js';
 let currentBook = null;
 let currentChapter = null;
 let navigation = null;
+let mobileNavigation = null;
 let bibleReader = null;
 let currentTooltip = null;
 
@@ -48,18 +50,20 @@ function displayChapter(book, chapter) {
     // Обновить заголовки
     updateHeaders(book, chapter, verses.length);
     
-    // Создать или обновить навигацию
+    // Создать или обновить навигацию (desktop)
     const navContainer = document.getElementById('navigation-container');
     if (navigation) {
       navigation.update(book, chapter);
     } else {
       navigation = new Navigation(navContainer, book, chapter, handleNavigation);
-      
-      // Добавить поиск в навигацию
-      const searchContainer = document.getElementById('nav-search-container');
-      if (searchContainer) {
-        new Search(searchContainer);
-      }
+    }
+    
+    // Создать или обновить мобильную навигацию
+    const mobileNavButton = document.getElementById('mobile-nav-button');
+    if (mobileNavigation) {
+      mobileNavigation.update(book, chapter);
+    } else if (mobileNavButton) {
+      mobileNavigation = new MobileNavigation(mobileNavButton, book, chapter, handleNavigation);
     }
     
     // Создать или обновить читалку
@@ -106,6 +110,11 @@ function handleNavigation(book, chapter) {
   if (currentTooltip) {
     currentTooltip.close();
     currentTooltip = null;
+  }
+  
+  // Закрыть мобильное меню если открыто
+  if (mobileNavigation && mobileNavigation.isOpen) {
+    mobileNavigation.close();
   }
   
   // Отобразить новую главу
