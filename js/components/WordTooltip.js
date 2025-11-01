@@ -29,9 +29,25 @@ export class WordTooltip {
     // Создать контейнер тултипа с простой анимацией
     this.tooltipEl = document.createElement('div');
     this.tooltipEl.className = 'fixed z-[9999]';
-    this.tooltipEl.style.left = `${this.tooltipPos.x}px`;
-    this.tooltipEl.style.top = `${this.tooltipPos.y}px`;
-    this.tooltipEl.style.transform = 'translate(-50%, 10px)';
+    
+    // Определить, мобильное устройство или нет
+    const isMobile = window.innerWidth < 768;
+    
+    if (isMobile) {
+      // На мобильных: позиционирование по центру экрана, снизу
+      this.tooltipPos.x = window.innerWidth / 2;
+      this.tooltipPos.y = window.innerHeight * 0.7; // 70% от высоты экрана
+      this.tooltipEl.style.left = '50%';
+      this.tooltipEl.style.top = 'auto';
+      this.tooltipEl.style.bottom = '10px';
+      this.tooltipEl.style.transform = 'translateX(-50%)';
+    } else {
+      // На десктопе: позиционирование рядом с кликом
+      this.tooltipEl.style.left = `${this.tooltipPos.x}px`;
+      this.tooltipEl.style.top = `${this.tooltipPos.y}px`;
+      this.tooltipEl.style.transform = 'translate(-50%, 10px)';
+    }
+    
     this.tooltipEl.style.opacity = '0';
     this.tooltipEl.style.transition = 'opacity 0.2s ease-out';
     
@@ -59,10 +75,10 @@ export class WordTooltip {
   
   renderLoading() {
     return `
-      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl p-8 w-[430px] border border-[#E5DED1]">
+      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl p-6 md:p-8 w-[95vw] max-w-[430px] border border-[#E5DED1]">
         <div class="flex items-center justify-center gap-3">
           <div class="w-6 h-6 border-2 border-[#B35441] border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-[#4A3041] text-base">Загрузка...</span>
+          <span class="text-[#4A3041] text-sm md:text-base">Загрузка...</span>
         </div>
       </div>
     `;
@@ -70,19 +86,19 @@ export class WordTooltip {
   
   renderError() {
     return `
-      <div class="bg-gradient-to-br from-[#FDFDF8] via-rose-50 to-amber-50 backdrop-blur-xl border-2 border-rose-200 rounded-3xl shadow-2xl p-8 w-96">
-        <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="bg-gradient-to-br from-[#FDFDF8] via-rose-50 to-amber-50 backdrop-blur-xl border-2 border-rose-200 rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 w-[95vw] max-w-[430px]">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <p class="text-rose-700 font-bold text-lg mb-2">Ошибка</p>
+            <p class="text-rose-700 font-bold text-base md:text-lg mb-2">Ошибка</p>
             <p class="text-[#4A3041] text-sm leading-relaxed">${this.error}</p>
           </div>
         </div>
-        <button class="mt-6 w-full px-5 py-3 bg-gradient-to-r from-[#B35441] to-[#8A4A3B] text-white font-semibold rounded-xl hover:from-[#a74937] hover:to-[#733c31] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]" id="close-tooltip">
+        <button class="mt-4 md:mt-6 w-full px-4 md:px-5 py-2.5 md:py-3 bg-gradient-to-r from-[#B35441] to-[#8A4A3B] text-white font-semibold rounded-xl hover:from-[#a74937] hover:to-[#733c31] active:from-[#8a3428] active:to-[#5a2920] transition-all duration-200 shadow-md hover:shadow-lg transform active:scale-[0.98] touch-manipulation min-h-[44px]" id="close-tooltip">
           Закрыть
         </button>
       </div>
@@ -93,34 +109,34 @@ export class WordTooltip {
     const explanation = this.getExplanationForLevel();
     
     return `
-      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl w-[430px] max-h-[90vh] overflow-hidden flex flex-col border border-[#E5DED1]">
+      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl w-[95vw] max-w-[430px] max-h-[90vh] overflow-hidden flex flex-col border border-[#E5DED1]">
         <!-- Header (draggable) -->
-        <div id="tooltip-header" class="px-5 py-4 bg-gradient-to-r from-[#4A3041] to-[#B35441] cursor-move flex items-center justify-between">
-          <h3 class="text-xl font-bold text-white">
+        <div id="tooltip-header" class="px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-[#4A3041] to-[#B35441] cursor-move md:cursor-move touch-manipulation flex items-center justify-between">
+          <h3 class="text-lg md:text-xl font-bold text-white">
             ${escapeHtml(this.word)}
           </h3>
-          <button id="close-tooltip" class="text-white hover:text-amber-200 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button id="close-tooltip" class="text-white hover:text-amber-200 active:text-amber-300 transition-colors p-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center touch-manipulation" aria-label="Закрыть">
+            <svg class="w-5 h-5 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
         <!-- Tab Selector -->
-        <div class="flex gap-2 px-5 pt-4 bg-[#FDFDF8]">
-          <button class="complexity-btn px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${this.complexityLevel === 'basic' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8]'}" data-level="basic">
+        <div class="flex gap-2 px-4 md:px-5 pt-3 md:pt-4 bg-[#FDFDF8]">
+          <button class="complexity-btn flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-colors touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'basic' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8] active:bg-[#E5DED1]'}" data-level="basic">
             Простой
           </button>
-          <button class="complexity-btn px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${this.complexityLevel === 'intermediate' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8]'}" data-level="intermediate">
+          <button class="complexity-btn flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-colors touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'intermediate' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8] active:bg-[#E5DED1]'}" data-level="intermediate">
             Подробный
           </button>
         </div>
         
         <!-- Content -->
         <div class="overflow-y-auto custom-scrollbar flex-1">
-          <div class="p-5 space-y-4">
+          <div class="p-4 md:p-5 space-y-3 md:space-y-4">
             <!-- Main definition -->
-            <p class="text-[#2C1810] leading-relaxed text-sm">${escapeHtml(explanation)}</p>
+            <p class="text-[#2C1810] leading-relaxed text-sm md:text-sm">${escapeHtml(explanation)}</p>
             
             ${this.complexityLevel === 'basic' ? this.renderBasicContent() : this.renderDetailedContent()}
           </div>
@@ -133,21 +149,21 @@ export class WordTooltip {
     return `
       <!-- Original language info -->
       ${this.definition.greek_hebrew ? `
-        <div class="bg-[#F5F1E8] rounded-xl p-4 border border-[#E5DED1]">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xl">📜</span>
-            <h4 class="text-base font-bold text-[#4A3041]">Original Language</h4>
+        <div class="bg-[#F5F1E8] rounded-xl p-3 md:p-4 border border-[#E5DED1]">
+          <div class="flex items-center gap-2 mb-2 md:mb-3">
+            <span class="text-lg md:text-xl">📜</span>
+            <h4 class="text-sm md:text-base font-bold text-[#4A3041]">Original Language</h4>
           </div>
           <div class="space-y-2">
             <div class="flex items-baseline gap-2 flex-wrap">
-              <span class="text-xl font-bold text-[#2C1810]">${escapeHtml(this.definition.greek_hebrew.word)}</span>
-              <span class="text-sm text-[#6b5a53]">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
+              <span class="text-lg md:text-xl font-bold text-[#2C1810]">${escapeHtml(this.definition.greek_hebrew.word)}</span>
+              <span class="text-xs md:text-sm text-[#6b5a53]">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
               ${this.definition.greek_hebrew.strongs_number ? `
-                <span class="text-sm font-semibold text-[#8A9B69]">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
+                <span class="text-xs md:text-sm font-semibold text-[#8A9B69]">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
               ` : ''}
             </div>
             ${this.definition.greek_hebrew.root ? `
-              <div class="text-sm text-[#4A3041]">
+              <div class="text-xs md:text-sm text-[#4A3041]">
                 <span class="font-semibold italic">Root:</span> <span class="italic">${escapeHtml(this.definition.greek_hebrew.root)}${this.definition.greek_hebrew.literal_meaning ? ` (meaning "${escapeHtml(this.definition.greek_hebrew.literal_meaning)}")` : ''}</span>
               </div>
             ` : ''}
@@ -246,16 +262,30 @@ export class WordTooltip {
       };
     });
     
-    // Dragging
+    // Dragging - поддержка mouse и touch
     const header = this.tooltipEl.querySelector('#tooltip-header');
     if (header) {
+      // Mouse события
       header.onmousedown = (e) => {
-        // Не начинать перетаскивание, если клик на кнопке закрытия
         if (e.target.closest('#close-tooltip')) {
           return;
         }
         this.startDrag(e);
       };
+      
+      // Touch события для мобильных
+      header.addEventListener('touchstart', (e) => {
+        if (e.target.closest('#close-tooltip')) {
+          return;
+        }
+        e.preventDefault(); // Предотвратить скролл
+        const touch = e.touches[0];
+        this.startDrag({
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          preventDefault: () => e.preventDefault()
+        });
+      }, { passive: false });
     }
     
     // Close on Escape
@@ -266,74 +296,122 @@ export class WordTooltip {
     };
     document.addEventListener('keydown', this.escapeHandler);
     
-    // Click outside to close
+    // Click outside to close (mouse и touch)
     this.outsideClickHandler = (e) => {
+      if (!this.tooltipEl.contains(e.target)) {
+        this.close();
+      }
+    };
+    this.outsideTouchHandler = (e) => {
       if (!this.tooltipEl.contains(e.target)) {
         this.close();
       }
     };
     setTimeout(() => {
       document.addEventListener('mousedown', this.outsideClickHandler);
+      document.addEventListener('touchstart', this.outsideTouchHandler);
     }, 100);
   }
   
   startDrag(e) {
+    if (e.preventDefault) e.preventDefault();
     this.isDragging = true;
+    
+    const isMobile = window.innerWidth < 768;
+    const startX = e.clientX || e.touches?.[0]?.clientX || 0;
+    const startY = e.clientY || e.touches?.[0]?.clientY || 0;
+    
+    const rect = this.tooltipEl.getBoundingClientRect();
     this.dragOffset = {
-      x: e.clientX - this.tooltipPos.x,
-      y: e.clientY - this.tooltipPos.y
+      x: startX - (isMobile ? rect.left + rect.width / 2 : rect.left),
+      y: startY - (isMobile ? rect.top : rect.top)
     };
     
-    const mouseMoveHandler = (e) => {
-      if (this.isDragging) {
+    const moveHandler = (e) => {
+      if (!this.isDragging) return;
+      if (e.preventDefault) e.preventDefault();
+      
+      const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
+      const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
+      
+      if (isMobile) {
+        // На мобильных: перемещение по горизонтали, вертикально фиксировано снизу
+        const newX = clientX - this.dragOffset.x;
+        const maxX = window.innerWidth - rect.width;
+        const constrainedX = Math.max(0, Math.min(newX, maxX));
+        this.tooltipEl.style.left = `${constrainedX}px`;
+        this.tooltipEl.style.transform = 'none';
+        this.tooltipEl.style.bottom = '10px';
+      } else {
+        // На десктопе: свободное перемещение
         this.tooltipPos = {
-          x: e.clientX - this.dragOffset.x,
-          y: e.clientY - this.dragOffset.y
+          x: clientX - this.dragOffset.x,
+          y: clientY - this.dragOffset.y
         };
         this.tooltipEl.style.left = `${this.tooltipPos.x}px`;
         this.tooltipEl.style.top = `${this.tooltipPos.y}px`;
+        this.tooltipEl.style.transform = 'none';
       }
     };
     
-    const mouseUpHandler = () => {
+    const endHandler = () => {
       this.isDragging = false;
-      document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mouseup', mouseUpHandler);
+      document.removeEventListener('mousemove', moveHandler);
+      document.removeEventListener('mouseup', endHandler);
+      document.removeEventListener('touchmove', moveHandler, { passive: false });
+      document.removeEventListener('touchend', endHandler);
     };
     
-    document.addEventListener('mousemove', mouseMoveHandler);
-    document.addEventListener('mouseup', mouseUpHandler);
+    // Mouse события
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('mouseup', endHandler);
+    
+    // Touch события
+    document.addEventListener('touchmove', moveHandler, { passive: false });
+    document.addEventListener('touchend', endHandler);
   }
   
   adjustPosition() {
     if (!this.tooltipEl || this.isDragging) return;
     
-    const rect = this.tooltipEl.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
+    const isMobile = window.innerWidth < 768;
     
-    let newX = this.tooltipPos.x;
-    let newY = this.tooltipPos.y;
-    
-    // Adjust horizontal position
-    if (rect.right > viewportWidth - 20) {
-      newX = viewportWidth - rect.width / 2 - 20;
+    if (isMobile) {
+      // На мобильных: центрировать горизонтально, позиция снизу
+      this.tooltipEl.style.left = '50%';
+      this.tooltipEl.style.transform = 'translateX(-50%)';
+      this.tooltipEl.style.top = 'auto';
+      this.tooltipEl.style.bottom = '10px';
+    } else {
+      // На десктопе: корректировать позицию относительно клика
+      const rect = this.tooltipEl.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      let newX = this.tooltipPos.x;
+      let newY = this.tooltipPos.y;
+      
+      // Adjust horizontal position
+      if (rect.right > viewportWidth - 20) {
+        newX = viewportWidth - rect.width / 2 - 20;
+      }
+      if (rect.left < 20) {
+        newX = rect.width / 2 + 20;
+      }
+      
+      // Adjust vertical position
+      if (rect.bottom > viewportHeight - 20) {
+        newY = this.position.y - rect.height - 20;
+      }
+      if (rect.top < 20) {
+        newY = 20;
+      }
+      
+      this.tooltipPos = { x: newX, y: newY };
+      this.tooltipEl.style.left = `${newX}px`;
+      this.tooltipEl.style.top = `${newY}px`;
+      this.tooltipEl.style.transform = 'translate(-50%, 10px)';
     }
-    if (rect.left < 20) {
-      newX = rect.width / 2 + 20;
-    }
-    
-    // Adjust vertical position
-    if (rect.bottom > viewportHeight - 20) {
-      newY = this.position.y - rect.height - 20;
-    }
-    if (rect.top < 20) {
-      newY = 20;
-    }
-    
-    this.tooltipPos = { x: newX, y: newY };
-    this.tooltipEl.style.left = `${newX}px`;
-    this.tooltipEl.style.top = `${newY}px`;
   }
   
   close() {
@@ -342,6 +420,9 @@ export class WordTooltip {
     }
     if (this.outsideClickHandler) {
       document.removeEventListener('mousedown', this.outsideClickHandler);
+    }
+    if (this.outsideTouchHandler) {
+      document.removeEventListener('touchstart', this.outsideTouchHandler);
     }
     if (this.tooltipEl) {
       this.tooltipEl.style.opacity = '0';

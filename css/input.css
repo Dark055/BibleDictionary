@@ -51,3 +51,71 @@ mark {
   @apply bg-gradient-to-r from-yellow-100 to-amber-100;
   transition: background-color 0.3s ease;
 }
+
+/* Mobile optimizations */
+@layer utilities {
+  /* Touch targets - минимум 44x44px для удобного взаимодействия */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Touch manipulation - предотвращает задержку 300ms на мобильных */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Предотвратить double-tap zoom на интерактивных элементах */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+  
+  /* Улучшенный скролл на мобильных */
+  @media (max-width: 768px) {
+    html {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Оптимизация скролла для контейнеров */
+    .custom-scrollbar {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
+    /* Улучшенная читаемость текста на мобильных */
+    p, .verse-text {
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Предотвратить выбор текста при быстром тапе */
+    .word {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Улучшенная видимость активных состояний на touch устройствах */
+    button:active, a:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+  }
+  
+  /* Оптимизация для больших экранов */
+  @media (min-width: 769px) {
+    .word {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      user-select: text;
+    }
+  }
+}

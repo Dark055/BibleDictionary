@@ -2,6 +2,7 @@
 
 import { BIBLE_BOOKS, BIBLE_STRUCTURE } from '../config.js';
 import { Search } from '../components/Search.js';
+import { MobileMenu } from '../components/MobileMenu.js';
 import { loadBibleData, getBookStats } from '../bible-data.js';
 
 // Инициализация страницы
@@ -12,6 +13,18 @@ async function init() {
     console.log('Данные Библии загружены');
   } catch (error) {
     console.error('Ошибка загрузки данных:', error);
+  }
+  
+  // Инициализировать мобильное меню
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  if (mobileMenuButton) {
+    const menuItems = [
+      { href: '#home', label: 'Главная' },
+      { href: '#library', label: 'Библиотека' },
+      { href: '#featured', label: 'Рекомендации' },
+      { href: '#about', label: 'О проекте' }
+    ];
+    new MobileMenu(mobileMenuButton, menuItems);
   }
   
   // Инициализировать компонент поиска
