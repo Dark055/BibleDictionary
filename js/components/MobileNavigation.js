@@ -33,7 +33,8 @@ export class MobileNavigation {
     
     // Modal
     this.modalEl = document.createElement('div');
-    this.modalEl.className = 'fixed inset-x-4 top-20 md:hidden z-[101] transform translate-y-[-120%] transition-transform duration-300 ease-out';
+    this.modalEl.className = 'fixed inset-x-4 top-20 md:hidden z-[101] transition-transform duration-300 ease-out';
+    this.modalEl.style.transform = 'translateY(-120%)';
     
     this.render();
     
