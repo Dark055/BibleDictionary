@@ -11,6 +11,8 @@ export class BibleReader {
     this.verseRefs = {};
     this.wordTooltip = null;
     this.onWordClick = null; // Callback для клика по слову
+    this.lastTapTime = 0;
+    this.lastTapTarget = null;
     
     this.render();
     this.setupScrollToVerse();
@@ -73,15 +75,24 @@ export class BibleReader {
   }
   
   attachEventListeners() {
-    // Клик по слову (поддержка mouse и touch)
+    // Двойной клик по слову (поддержка mouse и touch)
     this.container.querySelectorAll('.word').forEach(wordEl => {
-      // Mouse событие
-      wordEl.addEventListener('click', (e) => this.handleWordClick(e));
+      // Двойной клик для десктопа
+      wordEl.addEventListener('dblclick', (e) => this.handleWordClick(e));
       
-      // Touch событие для лучшего отклика на мобильных
+      // Двойной тап для мобильных
       wordEl.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        this.handleWordClick(e);
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - this.lastTapTime;
+        
+        if (tapLength < 300 && tapLength > 0 && this.lastTapTarget === wordEl) {
+          e.preventDefault();
+          this.handleWordClick(e);
+          this.lastTapTime = 0;
+        } else {
+          this.lastTapTime = currentTime;
+          this.lastTapTarget = wordEl;
+        }
       }, { passive: false });
     });
     
