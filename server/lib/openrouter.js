@@ -8,7 +8,6 @@ export async function getWordDefinition(word, context) {
   if (!apiKey) {
     throw new Error('AI_API_KEY must be set in .env file');
   }
-  
   if (!apiUrl) {
     throw new Error('AI_API_URL must be set in .env file');
   }
@@ -17,7 +16,7 @@ export async function getWordDefinition(word, context) {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       model: aiModel,
@@ -25,27 +24,34 @@ export async function getWordDefinition(word, context) {
       messages: [
         {
           role: 'system',
-          content: `Проанализируй слово "${word}" в контексте: "${context}"
+          content: `Определи оригинальное слово (лемма) для \"${word}\" в контексте стиха: \"${context}\"
 
-Ответь JSON (без markdown):
+Используй язык оригинала по книге:
+• Книги Ветхого Завета — древнееврейский.
+• Арамейские отрывки ВЗ (Ездра 4:8–6:18; 7:12–26; Дан 2:4b–7:28; Иер 10:11) — арамейский.
+• Весь Новый Завет — древнегреческий (койне).
+
+Выбери корректную форму слова по контексту стиха.
+
+Ответь СТРОГО одним JSON-объектом (без markdown!):
 {
   "greek_hebrew": {
-    "word": "оригинальное слово",
-    "transliteration": "транслитерация",
-    "strongs_number": "H/G номер",
-    "root": "корень",
-    "literal_meaning": "буквальное значение"
+    "word": "<оригинальное слово>",
+    "transliteration": "<транслитерация>",
+    "strongs_number": "<H/G номер>",
+    "root": "<корень>",
+    "literal_meaning": "<буквальное значение>"
   },
   "explanations": {
-    "basic": "Простое объяснение (1-2 предложения)",
-    "intermediate": "Подробное объяснение с контекстом (3-4 предложения)"
+    "basic": "<Простое объяснение (1-2 предложения)>",
+    "intermediate": "<Подробное объяснение с дополнительным контекстом (3-4 предложения)>"
   }
 }
 
-ВСЁ НА РУССКОМ.`
-        }
-      ]
-    })
+ВСЁ НА РУССКОМ.`,
+        },
+      ],
+    }),
   });
 
   if (!response.ok) {
@@ -53,21 +59,17 @@ export async function getWordDefinition(word, context) {
   }
 
   const data = await response.json();
-  const content = data.choices[0]?.message?.content;
+  const content = data.choices?.[0]?.message?.content;
 
   if (!content) {
     return {};
   }
 
   try {
-    // The model sometimes returns the JSON inside a markdown code block
     let sanitizedContent = content.trim();
-    
-    // Remove markdown code blocks
     sanitizedContent = sanitizedContent.replace(/^```json\s*\n?/i, '');
     sanitizedContent = sanitizedContent.replace(/\n?```\s*$/i, '');
     sanitizedContent = sanitizedContent.trim();
-    
     return JSON.parse(sanitizedContent);
   } catch (error) {
     console.error('Failed to parse AI response:', content, error);
