@@ -6,8 +6,11 @@ let client = null;
 let clientPromise = null;
 
 function getClientPromise() {
-  // MongoDB URI вшит в код
-  const uri = "mongodb+srv://qwerty5q5w_db_user:V0HA2dwaLnHldsUZ@cluster0.wyxtx3z.mongodb.net/?appName=Cluster0";
+  // MongoDB URI берётся из переменной окружения
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI must be set in .env');
+  }
 
   if (clientPromise) {
     return clientPromise;

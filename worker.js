@@ -1,7 +1,39 @@
-import bibleDataRaw from './data/bible.json';
 import { parseReference, highlightText } from './shared/bible-utils.js';
 
-async function handleSearch(request) {
+let bibleDataCache = null;
+
+async function loadBibleData(request, env) {
+  if (bibleDataCache) return bibleDataCache;
+
+  const cache = caches.default;
+  const bibleUrl = new URL('/data/bible.json', request.url);
+  const req = new Request(bibleUrl.toString());
+
+  try {
+    let resp = await cache.match(req);
+    if (!resp) {
+      if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+        resp = await env.ASSETS.fetch(req);
+      } else {
+        resp = await fetch(req, { cf: { cacheTtl: 86400, cacheEverything: true } });
+      }
+      if (resp.ok) {
+        await cache.put(req, resp.clone());
+      }
+    }
+
+    if (!resp || !resp.ok) {
+      throw new Error(`HTTP ${resp ? resp.status : 'no response'} loading bible.json`);
+    }
+
+    bibleDataCache = await resp.json();
+    return bibleDataCache;
+  } catch (error) {
+    throw new Error(`Failed to load bible data: ${error.message}`);
+  }
+}
+
+async function handleSearch(request, env) {
   const url = new URL(request.url);
   const query = (url.searchParams.get('q') || '').toLowerCase();
 
@@ -14,7 +46,7 @@ async function handleSearch(request) {
     });
   }
 
-  const verses = bibleDataRaw;
+  const verses = await loadBibleData(request, env);
   const results = [];
 
   const referenceMatch = parseReference(query);
@@ -62,8 +94,12 @@ async function handleSearch(request) {
 }
 
 async function getWordDefinition(word, context, env) {
-  const apiKey = 'AIzaSyCQsebDKxGtgO1KS5rj_kUaaqxtmD_FUxA';
-  const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  const apiKey = env?.GEMINI_API_KEY;
+  const apiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY must be set as a Worker secret');
+  }
 
   const prompt = `Проанализируй слово "${word}" в контексте: "${context}"
 
@@ -234,7 +270,7 @@ export default {
       let response;
 
       if (path === '/api/search') {
-        response = await handleSearch(request);
+        response = await handleSearch(request, env);
       } else if (path === '/api/word') {
         response = await handleWord(request, env);
       } else if (path === '/health') {
@@ -257,6 +293,9 @@ export default {
           headers: { 'Content-Type': 'application/json' }
         });
       } else {
+        if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+          return env.ASSETS.fetch(request);
+        }
         return new Response('Not Found', { 
           status: 404,
           headers: corsHeaders 
