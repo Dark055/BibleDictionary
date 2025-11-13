@@ -94,12 +94,11 @@ async function handleSearch(request, env) {
 }
 
 async function getWordDefinition(word, context, env) {
-  const useOpenRouter = !!(env?.AI_API_KEY && env?.AI_API_URL);
   const geminiKey = env?.GEMINI_API_KEY;
   const geminiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
-  if (!useOpenRouter && !geminiKey) {
-    throw new Error('Set either AI_API_KEY/AI_API_URL (OpenRouter) or GEMINI_API_KEY (Gemini) as Worker secrets');
+  if (!geminiKey) {
+    throw new Error('GEMINI_API_KEY must be set as a Worker secret');
   }
 
   const prompt = `Проанализируй слово "${word}" в контексте: "${context}"
@@ -126,42 +125,18 @@ async function getWordDefinition(word, context, env) {
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      let response;
-      if (useOpenRouter) {
-        const aiModel = env?.AI_MODEL || 'minimax/minimax-m2:free';
-        const maxTokens = parseInt(env?.AI_MAX_TOKENS || '300', 10);
-        response = await fetch(env.AI_API_URL, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.AI_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: aiModel,
-            max_tokens: maxTokens,
-            response_format: { type: 'json_object' },
-            messages: [
-              {
-                role: 'system',
-                content: prompt
-              }
-            ]
-          })
-        });
-      } else {
-        response = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: {
-            'x-goog-api-key': geminiKey,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }]
-          })
-        });
-      }
+      const response = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': geminiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        })
+      });
 
       if (!response.ok) {
         const text = await response.text().catch(() => '');
@@ -171,13 +146,11 @@ async function getWordDefinition(word, context, env) {
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        throw new Error(`${useOpenRouter ? 'OpenRouter' : 'Gemini'} API error ${response.status}: ${text.slice(0, 500)}`);
+        throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 500)}`);
       }
 
       const data = await response.json();
-      const content = useOpenRouter
-        ? data.choices?.[0]?.message?.content
-        : data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) return {};
 
