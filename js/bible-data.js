@@ -77,7 +77,8 @@ export function analyzeWordFrequency(word) {
   }
   
   const normalized = word.toLowerCase();
-  const regex = new RegExp(normalized, 'gi');
+  const escaped = normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escaped, 'gi');
   
   const by_book = {};
   let OT = 0, NT = 0;

@@ -1,7 +1,6 @@
 // js/components/WordTooltip.js - Тултип для определения слова (упрощенная версия без графиков)
 
 import { getWordDefinition } from '../api-client.js';
-import { analyzeWordFrequency } from '../bible-data.js';
 import { BIBLE_BOOKS } from '../config.js';
 import { escapeHtml } from '../utils.js';
 

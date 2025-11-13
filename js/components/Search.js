@@ -2,7 +2,8 @@
 
 import { BIBLE_BOOKS, API_BASE_URL } from '../config.js';
 import { searchBible } from '../api-client.js';
-import { searchVerses } from '../bible-data.js';
+import { searchVerses as searchBollsVerses } from '../bolls-api.js';
+import { getCurrentTranslation } from '../bible-service.js';
 
 export class Search {
   constructor(container) {
@@ -13,6 +14,7 @@ export class Search {
     this.showResults = false;
     this.searchType = null;
     this.clickOutsideHandler = null;
+    this.offline = false;
     
     this.render();
     this.attachEvents();
@@ -91,6 +93,27 @@ export class Search {
   }
   
   renderResults() {
+    if (this.offline) {
+      return `
+        <div class="absolute w-full mt-3 bg-white border-2 border-[#8A9B69]/30
+                  rounded-xl shadow-2xl p-8 z-50">
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+              <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <p class="text-[#2C1810] font-semibold mb-2">
+              Поиск недоступен офлайн
+            </p>
+            <p class="text-sm text-gray-600">
+              Подключитесь к интернету, чтобы использовать поиск по Библии.
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
     if (this.results.length === 0 && !this.loading) {
       return `
         <div class="absolute w-full mt-3 bg-white border-2 border-[#8A9B69]/30
@@ -351,6 +374,7 @@ export class Search {
   }
   
   async performSearch() {
+    this.offline = false;
     this.loading = true;
     this.updateUI();
     
@@ -360,7 +384,8 @@ export class Search {
         this.results = data.results || [];
         this.searchType = data.type;
       } else {
-        const verses = searchVerses(this.query, 50);
+        const translation = getCurrentTranslation();
+        const verses = await searchBollsVerses(translation, this.query, { limit: 50 });
         this.results = this.highlightSearchResults(verses, this.query);
         this.searchType = 'text';
       }
@@ -370,10 +395,18 @@ export class Search {
       console.error('Search error:', error);
       this.results = [];
       this.showResults = true;
+      
+      if (error.message.includes('Bolls API error') || !navigator.onLine) {
+        this.showOfflineError();
+      }
     } finally {
       this.loading = false;
       this.updateUI();
     }
+  }
+  
+  showOfflineError() {
+    this.offline = true;
   }
   
   destroy() {

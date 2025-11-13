@@ -3,18 +3,10 @@
 import { BIBLE_BOOKS, BIBLE_STRUCTURE } from '../config.js';
 import { Search } from '../components/Search.js';
 import { MobileMenu } from '../components/MobileMenu.js';
-import { loadBibleData, getBookStats } from '../bible-data.js';
+import { TranslationSelector } from '../components/TranslationSelector.js';
 
 // Инициализация страницы
 async function init() {
-  // Загрузить данные Библии
-  try {
-    await loadBibleData();
-    console.log('Данные Библии загружены');
-  } catch (error) {
-    console.error('Ошибка загрузки данных:', error);
-  }
-  
   // Инициализировать мобильное меню
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   if (mobileMenuButton) {
@@ -22,7 +14,8 @@ async function init() {
       { href: '#home', label: 'Главная' },
       { href: '#library', label: 'Библиотека' },
       { href: '#featured', label: 'Рекомендации' },
-      { href: '#about', label: 'О проекте' }
+      { href: '#about', label: 'О проекте' },
+      { href: 'settings.html', label: '⚙️ Настройки' }
     ];
     new MobileMenu(mobileMenuButton, menuItems);
   }
@@ -38,6 +31,33 @@ async function init() {
   
   // Отрисовать библиотеку книг
   renderBooksLibrary();
+  
+  // Инициализировать десктопный селектор перевода
+  const translationContainer = document.getElementById('translation-selector');
+  if (translationContainer) {
+    new TranslationSelector(translationContainer, null, false);
+  }
+  
+  // Инициализировать мобильный селектор перевода
+  const mobileTranslationContainer = document.getElementById('mobile-translation-selector');
+  if (mobileTranslationContainer && window.innerWidth < 768) {
+    mobileTranslationContainer.classList.remove('hidden');
+    new TranslationSelector(mobileTranslationContainer, null, true);
+  }
+  
+  // Обработка изменения размера окна
+  window.addEventListener('resize', () => {
+    if (mobileTranslationContainer) {
+      if (window.innerWidth < 768) {
+        mobileTranslationContainer.classList.remove('hidden');
+        if (!mobileTranslationContainer.firstChild) {
+          new TranslationSelector(mobileTranslationContainer, null, true);
+        }
+      } else {
+        mobileTranslationContainer.classList.add('hidden');
+      }
+    }
+  });
 }
 
 // Отрисовать возможности платформы

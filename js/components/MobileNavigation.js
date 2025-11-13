@@ -1,14 +1,14 @@
 // js/components/MobileNavigation.js - Мобильная навигация в виде модального окна
 
 import { BIBLE_BOOKS } from '../config.js';
-import { getBookInfo } from '../bible-data.js';
+import { getBookInfo } from '../../shared/bible-books-info.js';
 import { updateUrl } from '../utils.js';
 
 export class MobileNavigation {
   constructor(button, currentBook, currentChapter, onNavigate) {
     this.button = button;
-    this.currentBook = currentBook;
-    this.currentChapter = currentChapter;
+    this.currentBook = Number(currentBook) || 1;
+    this.currentChapter = Number(currentChapter) || 1;
     this.onNavigate = onNavigate;
     this.bookInfo = getBookInfo(currentBook);
     this.isOpen = false;
@@ -314,9 +314,9 @@ export class MobileNavigation {
   }
   
   update(book, chapter) {
-    this.currentBook = book;
-    this.currentChapter = chapter;
-    this.bookInfo = getBookInfo(book);
+    this.currentBook = Number(book) || 1;
+    this.currentChapter = Number(chapter) || 1;
+    this.bookInfo = getBookInfo(this.currentBook);
     this.render();
   }
   

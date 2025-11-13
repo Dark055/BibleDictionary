@@ -4,7 +4,7 @@ import express from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseReference, escapeRegex, highlightText } from '../../shared/bible-utils.js';
+import { parseReference, highlightText } from '../../shared/bible-utils.js';
 
 const router = express.Router();
 

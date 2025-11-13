@@ -4,27 +4,53 @@
  * Получить параметры из URL
  */
 export function getUrlParams() {
-  const params = new URLSearchParams(window.location.search);
-  return {
-    book: params.get('book') ? parseInt(params.get('book')) : null,
-    chapter: params.get('chapter') ? parseInt(params.get('chapter')) : null,
-    verse: params.get('verse') ? parseInt(params.get('verse')) : null,
-  };
+  const params = {};
+  const hash = window.location.hash.slice(1);
+  const queryString = window.location.search.slice(1);
+  
+  // Парсим query параметры (?book=1&chapter=1)
+  if (queryString) {
+    const queryPairs = queryString.split('&');
+    queryPairs.forEach(pair => {
+      const [key, value] = pair.split('=');
+      if (key && value) {
+        params[decodeURIComponent(key)] = decodeURIComponent(value);
+      }
+    });
+  }
+  
+  // Парсим hash параметры (#/read/1/1)
+  if (hash) {
+    const parts = hash.split('/');
+    if (parts[0] === 'read' && parts[1] && parts[2]) {
+      params.book = parseInt(parts[1]);
+      params.chapter = parseInt(parts[2]);
+    }
+  }
+  
+  return params;
 }
 
 /**
  * Обновить URL без перезагрузки страницы
  */
-export function updateUrl(book, chapter, verse = null) {
-  const url = new URL(window.location);
-  url.searchParams.set('book', book);
-  url.searchParams.set('chapter', chapter);
-  if (verse) {
-    url.searchParams.set('verse', verse);
-  } else {
-    url.searchParams.delete('verse');
+export function updateUrl(book, chapter, translation = null) {
+  const hash = `/read/${book}/${chapter}`;
+  const params = new URLSearchParams(window.location.search);
+  
+  if (translation) {
+    params.set('translation', translation);
   }
-  window.history.pushState({}, '', url);
+  
+  const queryString = params.toString();
+  const newUrl = `${window.location.pathname}${queryString ? '?' + queryString : ''}${hash}`;
+  
+  window.history.replaceState(null, '', newUrl);
+}
+
+export function getTranslationFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('translation');
 }
 
 /**
