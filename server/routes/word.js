@@ -3,6 +3,7 @@
 import express from 'express';
 import getClientPromise from '../lib/mongodb.js';
 import { getWordDefinition } from '../lib/openrouter.js';
+import { getWordDefinitionGemini } from '../lib/gemini.js';
 
 const router = express.Router();
 
@@ -92,7 +93,17 @@ router.post('/', async (req, res) => {
     
     console.log(`Cache miss - generating definition for: ${sanitizedWord} in ${sanitizedVerseRef}`);
     
-    const aiDefinition = await getWordDefinition(sanitizedWord, sanitizedContext);
+    // Choose API provider based on environment variable
+    const useGemini = process.env.USE_GEMINI === 'true' || process.env.GEMINI_API_KEY;
+    let aiDefinition;
+    
+    if (useGemini && process.env.GEMINI_API_KEY) {
+      console.log('Using Gemini API for word definition');
+      aiDefinition = await getWordDefinitionGemini(sanitizedWord, sanitizedContext);
+    } else {
+      console.log('Using OpenRouter API for word definition');
+      aiDefinition = await getWordDefinition(sanitizedWord, sanitizedContext);
+    }
     
     if (!aiDefinition) {
       return res.status(500).json({

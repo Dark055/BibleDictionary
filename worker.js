@@ -94,11 +94,12 @@ async function handleSearch(request, env) {
 }
 
 async function getWordDefinition(word, context, env) {
-  const apiKey = env?.GEMINI_API_KEY;
-  const apiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  const useOpenRouter = !!(env?.AI_API_KEY && env?.AI_API_URL);
+  const geminiKey = env?.GEMINI_API_KEY;
+  const geminiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY must be set as a Worker secret');
+  if (!useOpenRouter && !geminiKey) {
+    throw new Error('Set either AI_API_KEY/AI_API_URL (OpenRouter) or GEMINI_API_KEY (Gemini) as Worker secrets');
   }
 
   const prompt = `Проанализируй слово "${word}" в контексте: "${context}"
@@ -125,52 +126,75 @@ async function getWordDefinition(word, context, env) {
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'x-goog-api-key': apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }]
-        })
-      });
+      let response;
+      if (useOpenRouter) {
+        const aiModel = env?.AI_MODEL || 'minimax/minimax-m2:free';
+        const maxTokens = parseInt(env?.AI_MAX_TOKENS || '300', 10);
+        response = await fetch(env.AI_API_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.AI_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: aiModel,
+            max_tokens: maxTokens,
+            response_format: { type: 'json_object' },
+            messages: [
+              {
+                role: 'system',
+                content: prompt
+              }
+            ]
+          })
+        });
+      } else {
+        response = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: {
+            'x-goog-api-key': geminiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: prompt }]
+            }]
+          })
+        });
+      }
 
       if (!response.ok) {
         const text = await response.text().catch(() => '');
-        
         if ((response.status === 503 || response.status === 429) && attempt < maxRetries - 1) {
           const delay = Math.pow(2, attempt) * 1000;
-          console.log(`Gemini overloaded (${attempt + 1}/${maxRetries}), retry in ${delay}ms`);
+          console.log(`AI overloaded (${attempt + 1}/${maxRetries}), retry in ${delay}ms`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
-        throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 500)}`);
+        throw new Error(`${useOpenRouter ? 'OpenRouter' : 'Gemini'} API error ${response.status}: ${text.slice(0, 500)}`);
       }
 
       const data = await response.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const content = useOpenRouter
+        ? data.choices?.[0]?.message?.content
+        : data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) return {};
 
       let sanitizedContent = content.trim();
       sanitizedContent = sanitizedContent.replace(/^```json\s*\n?/i, '');
       sanitizedContent = sanitizedContent.replace(/\n?```\s*$/i, '');
-      
       return JSON.parse(sanitizedContent.trim());
-      
+
     } catch (error) {
       lastError = error;
-      if ((error.message.includes('503') || error.message.includes('429')) && attempt < maxRetries - 1) {
+      if ((String(error?.message || '').includes('503') || String(error?.message || '').includes('429')) && attempt < maxRetries - 1) {
         continue;
       }
       throw error;
     }
   }
-  
+
   throw lastError || new Error('All retry attempts failed');
 }
 

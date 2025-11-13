@@ -4,5 +4,5 @@ pages_build_output_dir = "."
 
 [[kv_namespaces]]
 binding = "WORDS_KV"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = "fbedb6d296734a35959992c3efe92363"
 preview_id = "REPLACE_WITH_DEV_KV_ID"
