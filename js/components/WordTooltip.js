@@ -96,10 +96,10 @@ export class WordTooltip {
   
   renderLoading() {
     return `
-      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl p-6 md:p-8 w-[95vw] max-w-[430px] border border-[#E5DED1]">
+      <div class="bg-white rounded-2xl shadow-minimal-lg p-8 md:p-10 w-[95vw] max-w-[430px] border border-light-gray">
         <div class="flex items-center justify-center gap-3">
-          <div class="w-6 h-6 border-2 border-[#B35441] border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-[#4A3041] text-sm md:text-base">Загрузка...</span>
+          <div class="w-6 h-6 border-2 border-accent-warm border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-text-primary text-sm md:text-base">Загрузка...</span>
         </div>
       </div>
     `;
@@ -107,19 +107,19 @@ export class WordTooltip {
   
   renderError() {
     return `
-      <div class="bg-gradient-to-br from-[#FDFDF8] via-rose-50 to-amber-50 backdrop-blur-xl border-2 border-rose-200 rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 w-[95vw] max-w-[430px]">
-        <div class="flex items-start gap-3 md:gap-4">
-          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 md:w-6 md:h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div class="bg-white border border-red-200 rounded-2xl shadow-minimal-lg p-8 md:p-10 w-[95vw] max-w-[430px]">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div>
-            <p class="text-rose-700 font-bold text-base md:text-lg mb-2">Ошибка</p>
-            <p class="text-[#4A3041] text-sm leading-relaxed">${this.error}</p>
+          <div class="flex-1">
+            <p class="text-red-600 font-semibold text-base md:text-lg mb-2">Ошибка</p>
+            <p class="text-text-secondary text-sm leading-relaxed">${this.error}</p>
           </div>
         </div>
-        <button class="mt-4 md:mt-6 w-full px-4 md:px-5 py-2.5 md:py-3 bg-gradient-to-r from-[#B35441] to-[#8A4A3B] text-white font-semibold rounded-xl hover:from-[#a74937] hover:to-[#733c31] active:from-[#8a3428] active:to-[#5a2920] transition-all duration-200 shadow-md hover:shadow-lg transform active:scale-[0.98] touch-manipulation min-h-[44px]" id="close-tooltip">
+        <button class="mt-6 w-full px-5 py-3 bg-text-primary hover:bg-accent-warm text-white font-medium rounded-xl transition-all duration-200 shadow-minimal hover:shadow-minimal-md touch-manipulation min-h-[44px]" id="close-tooltip">
           Закрыть
         </button>
       </div>
@@ -128,37 +128,37 @@ export class WordTooltip {
   
   renderContent() {
     const explanation = this.getExplanationForLevel();
-    
+
     return `
-      <div class="bg-[#FDFDF8] rounded-2xl shadow-2xl w-[95vw] max-w-[430px] max-h-[90vh] overflow-hidden flex flex-col border border-[#E5DED1]">
-        <!-- Header (draggable) -->
-        <div id="tooltip-header" class="px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-[#4A3041] to-[#B35441] cursor-move md:cursor-move touch-manipulation flex items-center justify-between">
-          <h3 class="text-lg md:text-xl font-bold text-white">
+      <div class="bg-white rounded-2xl shadow-minimal-lg w-[95vw] max-w-[430px] max-h-[90vh] overflow-hidden flex flex-col border border-light-gray">
+        <!-- Header (draggable) - минималистичный светлый -->
+        <div id="tooltip-header" class="px-5 md:px-6 py-4 md:py-5 bg-warm-white border-b border-light-gray cursor-move md:cursor-move touch-manipulation flex items-center justify-between">
+          <h3 class="text-xl md:text-2xl font-serif font-semibold text-text-primary">
             ${escapeHtml(this.word)}
           </h3>
-          <button id="close-tooltip" class="text-white hover:text-amber-200 active:text-amber-300 transition-colors p-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center touch-manipulation" aria-label="Закрыть">
-            <svg class="w-5 h-5 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button id="close-tooltip" class="text-text-secondary hover:text-accent-warm transition-colors p-2 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center touch-manipulation rounded-lg hover:bg-white" aria-label="Закрыть">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        
-        <!-- Tab Selector -->
-        <div class="flex gap-2 px-4 md:px-5 pt-3 md:pt-4 bg-[#FDFDF8]">
-          <button class="complexity-btn flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-colors touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'basic' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8] active:bg-[#E5DED1]'}" data-level="basic">
+
+        <!-- Tab Selector - минималистичный -->
+        <div class="flex gap-2 px-5 md:px-6 pt-4 md:pt-5 bg-white">
+          <button class="complexity-btn flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-all touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'basic' ? 'bg-accent-warm text-white shadow-minimal' : 'bg-warm-white text-text-primary hover:bg-light-gray'}" data-level="basic">
             Простой
           </button>
-          <button class="complexity-btn flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-colors touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'intermediate' ? 'bg-[#B35441] text-white' : 'bg-white text-[#4A3041] border border-[#E5DED1] hover:bg-[#F5F1E8] active:bg-[#E5DED1]'}" data-level="intermediate">
+          <button class="complexity-btn flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-all touch-manipulation min-h-[44px] md:min-h-0 ${this.complexityLevel === 'intermediate' ? 'bg-accent-warm text-white shadow-minimal' : 'bg-warm-white text-text-primary hover:bg-light-gray'}" data-level="intermediate">
             Подробный
           </button>
         </div>
-        
+
         <!-- Content -->
         <div class="overflow-y-auto custom-scrollbar flex-1">
-          <div class="p-4 md:p-5 space-y-3 md:space-y-4">
+          <div class="p-5 md:p-6 space-y-4 md:space-y-5">
             <!-- Main definition -->
-            <p class="text-[#2C1810] leading-relaxed text-sm md:text-sm">${escapeHtml(explanation)}</p>
-            
+            <p class="text-text-primary leading-relaxed text-base md:text-lg">${escapeHtml(explanation)}</p>
+
             ${this.complexityLevel === 'basic' ? this.renderBasicContent() : this.renderDetailedContent()}
           </div>
         </div>
@@ -170,22 +170,22 @@ export class WordTooltip {
     return `
       <!-- Original language info -->
       ${this.definition.greek_hebrew ? `
-        <div class="bg-[#F5F1E8] rounded-xl p-3 md:p-4 border border-[#E5DED1]">
-          <div class="flex items-center gap-2 mb-2 md:mb-3">
-            <span class="text-lg md:text-xl">📜</span>
-            <h4 class="text-sm md:text-base font-bold text-[#4A3041]">Original Language</h4>
+        <div class="bg-warm-white rounded-xl p-4 md:p-5 border border-light-gray">
+          <div class="flex items-center gap-2 mb-3 md:mb-4">
+            <span class="text-xl md:text-2xl">📜</span>
+            <h4 class="text-sm md:text-base font-serif font-semibold text-text-primary">Оригинальный язык</h4>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-3">
             <div class="flex items-baseline gap-2 flex-wrap">
-              <span class="text-lg md:text-xl font-bold text-[#2C1810]">${escapeHtml(this.definition.greek_hebrew.word)}</span>
-              <span class="text-xs md:text-sm text-[#6b5a53]">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
+              <span class="text-xl md:text-2xl font-serif font-semibold text-text-primary">${escapeHtml(this.definition.greek_hebrew.word)}</span>
+              <span class="text-sm md:text-base text-text-secondary">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
               ${this.definition.greek_hebrew.strongs_number ? `
-                <span class="text-xs md:text-sm font-semibold text-[#8A9B69]">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
+                <span class="text-xs md:text-sm font-medium text-accent-warm px-2 py-0.5 bg-white rounded-md border border-light-gray">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
               ` : ''}
             </div>
             ${this.definition.greek_hebrew.root ? `
-              <div class="text-xs md:text-sm text-[#4A3041]">
-                <span class="font-semibold italic">Root:</span> <span class="italic">${escapeHtml(this.definition.greek_hebrew.root)}${this.definition.greek_hebrew.literal_meaning ? ` (meaning "${escapeHtml(this.definition.greek_hebrew.literal_meaning)}")` : ''}</span>
+              <div class="text-sm md:text-base text-text-secondary">
+                <span class="font-semibold">Корень:</span> <span class="italic">${escapeHtml(this.definition.greek_hebrew.root)}${this.definition.greek_hebrew.literal_meaning ? ` (значение: "${escapeHtml(this.definition.greek_hebrew.literal_meaning)}")` : ''}</span>
               </div>
             ` : ''}
           </div>
@@ -198,22 +198,22 @@ export class WordTooltip {
     return `
       <!-- Original language info -->
       ${this.definition.greek_hebrew ? `
-        <div class="bg-[#F5F1E8] rounded-xl p-4 border border-[#E5DED1]">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xl">📜</span>
-            <h4 class="text-base font-bold text-[#4A3041]">Original language</h4>
+        <div class="bg-warm-white rounded-xl p-5 md:p-6 border border-light-gray">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-2xl">📜</span>
+            <h4 class="text-base md:text-lg font-serif font-semibold text-text-primary">Оригинальный язык</h4>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-3">
             <div class="flex items-baseline gap-2 flex-wrap">
-              <span class="text-xl font-bold text-[#2C1810]">${escapeHtml(this.definition.greek_hebrew.word)}</span>
-              <span class="text-sm text-[#6b5a53]">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
+              <span class="text-2xl md:text-3xl font-serif font-semibold text-text-primary">${escapeHtml(this.definition.greek_hebrew.word)}</span>
+              <span class="text-base md:text-lg text-text-secondary">(${escapeHtml(this.definition.greek_hebrew.transliteration || '')})</span>
               ${this.definition.greek_hebrew.strongs_number ? `
-                <span class="text-sm font-semibold text-[#8A9B69]">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
+                <span class="text-sm md:text-base font-medium text-accent-warm px-2.5 py-1 bg-white rounded-md border border-light-gray">Strong's ${escapeHtml(this.definition.greek_hebrew.strongs_number)}</span>
               ` : ''}
             </div>
             ${this.definition.greek_hebrew.root ? `
-              <div class="text-sm text-[#4A3041]">
-                <span class="font-semibold italic">Root:</span> <span class="italic">${escapeHtml(this.definition.greek_hebrew.root)}${this.definition.greek_hebrew.literal_meaning ? ` (meaning "${escapeHtml(this.definition.greek_hebrew.literal_meaning)}")` : ''}</span>
+              <div class="text-base md:text-lg text-text-secondary leading-relaxed">
+                <span class="font-semibold">Корень:</span> <span class="italic">${escapeHtml(this.definition.greek_hebrew.root)}${this.definition.greek_hebrew.literal_meaning ? ` (значение: "${escapeHtml(this.definition.greek_hebrew.literal_meaning)}")` : ''}</span>
               </div>
             ` : ''}
           </div>

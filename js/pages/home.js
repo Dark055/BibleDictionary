@@ -17,8 +17,7 @@ async function init() {
       { href: '#home', label: 'Главная' },
       { href: '#library', label: 'Библиотека' },
       { href: '#featured', label: 'Рекомендации' },
-      { href: '#about', label: 'О проекте' },
-      { href: 'settings.html', label: '⚙️ Настройки' }
+      { href: '#about', label: 'О проекте' }
     ];
     new MobileMenu(mobileMenuButton, menuItems);
   }
