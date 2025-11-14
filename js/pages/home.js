@@ -98,14 +98,14 @@ function renderFeatures() {
   const featuresGrid = document.getElementById('features-grid');
   if (featuresGrid) {
     featuresGrid.innerHTML = features.map(feature => `
-      <div class="group bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-        <div class="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
+      <div class="group bg-white rounded-2xl p-8 border border-light-gray shadow-minimal hover:shadow-minimal-lg transition-all duration-300 hover-float">
+        <div class="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
           ${feature.icon}
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-3">
+        <h3 class="text-xl font-serif font-semibold text-text-primary mb-3">
           ${feature.title}
         </h3>
-        <p class="text-gray-600 leading-relaxed">
+        <p class="text-text-secondary leading-relaxed">
           ${feature.description}
         </p>
       </div>
@@ -122,44 +122,31 @@ function renderBooksLibrary() {
   
   booksLibrary.innerHTML = sections.map(section => {
     const sectionBooks = BIBLE_BOOKS.slice(section.start - 1, section.end);
-    const isOT = section.end <= 39;
-    
+
     return `
-      <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200/50 shadow-lg">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-2xl font-bold bg-gradient-to-r ${
-            isOT ? 'from-blue-600 to-indigo-600' : 'from-green-600 to-emerald-600'
-          } bg-clip-text text-transparent">
+      <div class="bg-white rounded-2xl p-8 border border-light-gray shadow-minimal">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-light-gray">
+          <h3 class="text-2xl font-serif font-semibold text-text-primary">
             ${section.name}
           </h3>
-          <span class="px-3 py-1 ${
-            isOT ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-          } rounded-full text-sm font-semibold">
+          <span class="px-4 py-1.5 bg-warm-white text-text-secondary rounded-full text-sm font-medium">
             ${sectionBooks.length} ${sectionBooks.length === 1 ? 'книга' : 'книг'}
           </span>
         </div>
-        
+
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           ${sectionBooks.map((book, idx) => {
             const bookNum = section.start + idx;
             return `
-              <a 
+              <a
                 href="read.html?book=${bookNum}&chapter=1"
-                class="group px-4 py-3 bg-gradient-to-r ${
-                  isOT 
-                    ? 'from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200' 
-                    : 'from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200'
-                } border rounded-xl transition-all duration-300 hover:shadow-md transform hover:-translate-y-1"
+                class="group px-4 py-4 bg-warm-white hover:bg-accent-warm hover:text-white border border-light-gray rounded-xl transition-all duration-300 hover:shadow-minimal-md hover-float"
               >
                 <div class="flex items-center justify-between">
-                  <span class="font-semibold ${
-                    isOT ? 'text-blue-700' : 'text-green-700'
-                  } group-hover:text-opacity-80">
+                  <span class="font-serif font-medium text-text-primary group-hover:text-white transition-colors">
                     ${book}
                   </span>
-                  <svg class="w-4 h-4 ${
-                    isOT ? 'text-blue-500' : 'text-green-500'
-                  } opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-text-secondary group-hover:text-white opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>

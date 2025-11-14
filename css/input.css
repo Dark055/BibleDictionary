@@ -14,15 +14,29 @@
       transform: translateX(-50%) translateY(0);
     }
   }
-  
+
   .animate-tooltip-fade-in {
     animation: tooltipFadeIn 0.3s ease-out forwards;
+  }
+
+  /* РњРёРЅРёРјР°Р»РёСЃС‚РёС‡РЅС‹Рµ hover СЌС„С„РµРєС‚С‹ */
+  @keyframes subtleFloat {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-4px);
+    }
+  }
+
+  .hover-float:hover {
+    animation: subtleFloat 0.3s ease-out forwards;
   }
 }
 
 /* Custom styles */
 mark {
-  @apply bg-yellow-200 px-1 rounded;
+  @apply bg-yellow-100/50 px-1 rounded border-b-2 border-yellow-300/30;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -46,10 +60,18 @@ mark {
   border: 2px solid rgba(190, 120, 100, 0.1);
 }
 
-/* Verse highlight */
+/* Verse highlight - РјРёРЅРёРјР°Р»РёСЃС‚РёС‡РЅС‹Р№ СЃС‚РёР»СЊ */
 .verse-highlight {
-  @apply bg-gradient-to-r from-yellow-100 to-amber-100;
-  transition: background-color 0.3s ease;
+  @apply bg-stone-100/60 border-l-2 border-stone-300;
+  transition: all 0.3s ease;
+}
+
+/* Glassmorphism РґР»СЏ РЅР°РІРёРіР°С†РёРё */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(231, 229, 228, 0.5);
 }
 
 /* Mobile optimizations */
@@ -119,9 +141,9 @@ mark {
     }
   }
 }
-/* Дополнительные mobile стили */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ mobile пїЅпїЅпїЅпїЅпїЅ */
 
-/* Предотвращение iOS zoom при фокусе input */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ iOS zoom пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ input */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
@@ -132,7 +154,7 @@ mark {
   }
 }
 
-/* Безопасные зоны для iPhone X+ */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ iPhone X+ */
 @media (max-width: 768px) {
   .safe-area-padding {
     padding-left: env(safe-area-inset-left);
@@ -145,7 +167,7 @@ mark {
   }
 }
 
-/* Очень маленькие экраны (iPhone SE) */
+/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (iPhone SE) */
 @media (max-width: 375px) {
   h1 {
     font-size: 1.75rem;
@@ -162,7 +184,7 @@ mark {
   }
 }
 
-/* Landscape на мобильных */
+/* Landscape пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 @media (max-width: 768px) and (orientation: landscape) {
   section {
     padding-top: 2rem !important;
