@@ -5,6 +5,9 @@ import { Search } from '../components/Search.js';
 import { MobileMenu } from '../components/MobileMenu.js';
 import { TranslationSelector } from '../components/TranslationSelector.js';
 
+// Текущий активный таб
+let currentTab = 'all';
+
 // Инициализация страницы
 async function init() {
   // Инициализировать мобильное меню
@@ -19,32 +22,35 @@ async function init() {
     ];
     new MobileMenu(mobileMenuButton, menuItems);
   }
-  
+
   // Инициализировать компонент поиска
   const searchContainer = document.getElementById('search-container');
   if (searchContainer) {
     new Search(searchContainer);
   }
-  
+
   // Отрисовать фичи
   renderFeatures();
-  
+
   // Отрисовать библиотеку книг
   renderBooksLibrary();
-  
+
+  // Инициализировать tabs
+  initTabs();
+
   // Инициализировать десктопный селектор перевода
   const translationContainer = document.getElementById('translation-selector');
   if (translationContainer) {
     new TranslationSelector(translationContainer, null, false);
   }
-  
+
   // Инициализировать мобильный селектор перевода
   const mobileTranslationContainer = document.getElementById('mobile-translation-selector');
   if (mobileTranslationContainer && window.innerWidth < 768) {
     mobileTranslationContainer.classList.remove('hidden');
     new TranslationSelector(mobileTranslationContainer, null, true);
   }
-  
+
   // Обработка изменения размера окна
   window.addEventListener('resize', () => {
     if (mobileTranslationContainer) {
@@ -57,6 +63,29 @@ async function init() {
         mobileTranslationContainer.classList.add('hidden');
       }
     }
+  });
+}
+
+// Инициализировать tabs
+function initTabs() {
+  const tabButtons = document.querySelectorAll('.library-tab');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tab = button.dataset.tab;
+
+      // Обновить активный таб
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active', 'bg-accent-warm', 'text-white');
+        btn.classList.add('text-text-secondary');
+      });
+
+      button.classList.add('active', 'bg-accent-warm', 'text-white');
+      button.classList.remove('text-text-secondary');
+
+      currentTab = tab;
+      renderBooksLibrary();
+    });
   });
 }
 
@@ -117,24 +146,37 @@ function renderFeatures() {
 function renderBooksLibrary() {
   const booksLibrary = document.getElementById('books-library');
   if (!booksLibrary) return;
-  
+
   const sections = BIBLE_STRUCTURE.SECTIONS;
-  
-  booksLibrary.innerHTML = sections.map(section => {
+
+  // Фильтровать секции по текущему табу
+  let filteredSections = sections;
+  if (currentTab === 'ot') {
+    filteredSections = sections.filter(section => section.end <= 39);
+  } else if (currentTab === 'nt') {
+    filteredSections = sections.filter(section => section.start >= 40);
+  }
+
+  booksLibrary.innerHTML = filteredSections.map(section => {
     const sectionBooks = BIBLE_BOOKS.slice(section.start - 1, section.end);
 
     return `
       <div class="bg-white rounded-2xl p-8 border border-light-gray shadow-minimal">
-        <div class="flex items-center justify-between mb-8 pb-4 border-b border-light-gray">
-          <h3 class="text-2xl font-serif font-semibold text-text-primary">
-            ${section.name}
-          </h3>
-          <span class="px-4 py-1.5 bg-warm-white text-text-secondary rounded-full text-sm font-medium">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 pb-4 border-b border-light-gray gap-3">
+          <div>
+            <h3 class="text-2xl font-serif font-semibold text-text-primary mb-1">
+              ${section.name}
+            </h3>
+            <p class="text-sm text-text-muted">
+              ${getSectionDescription(section.name)}
+            </p>
+          </div>
+          <span class="px-4 py-1.5 bg-warm-white text-text-secondary rounded-full text-sm font-medium whitespace-nowrap">
             ${sectionBooks.length} ${sectionBooks.length === 1 ? 'книга' : 'книг'}
           </span>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           ${sectionBooks.map((book, idx) => {
             const bookNum = section.start + idx;
             return `
@@ -157,6 +199,23 @@ function renderBooksLibrary() {
       </div>
     `;
   }).join('');
+}
+
+// Получить описание секции
+function getSectionDescription(name) {
+  const descriptions = {
+    'Закон': 'Первые пять книг Моисея',
+    'История': 'Исторические книги Израиля',
+    'Поэзия и мудрость': 'Поэтические и учительные книги',
+    'Великие пророки': 'Книги великих пророков',
+    'Малые пророки': 'Книги малых пророков',
+    'Евангелия': 'Жизнь и учение Иисуса Христа',
+    'История': 'Деяния апостолов',
+    'Послания Павла': 'Письма апостола Павла',
+    'Общие послания': 'Письма других апостолов',
+    'Пророчество': 'Откровение Иоанна Богослова'
+  };
+  return descriptions[name] || '';
 }
 
 // Запустить инициализацию при загрузке страницы

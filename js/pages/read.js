@@ -8,6 +8,10 @@ import { MobileNavigation } from '../components/MobileNavigation.js';
 import { BibleReader } from '../components/BibleReader.js';
 import { WordTooltip } from '../components/WordTooltip.js';
 import { TranslationSelector } from '../components/TranslationSelector.js';
+import { Sidebar } from '../components/Sidebar.js';
+import { ProgressBar } from '../components/ProgressBar.js';
+import { Breadcrumbs } from '../components/Breadcrumbs.js';
+import { BottomNav } from '../components/BottomNav.js';
 
 let currentBook = null;
 let currentChapter = null;
@@ -16,6 +20,10 @@ let mobileNavigation = null;
 let bibleReader = null;
 let currentTooltip = null;
 let translationSelector = null;
+let sidebar = null;
+let progressBar = null;
+let breadcrumbs = null;
+let bottomNav = null;
 
 // Инициализация страницы
 async function init() {
@@ -34,22 +42,46 @@ async function init() {
     return;
   }
   
+  // Инициализировать Sidebar (Desktop)
+  const sidebarContainer = document.getElementById('sidebar-container');
+  if (sidebarContainer) {
+    sidebar = new Sidebar(sidebarContainer, currentBook, currentChapter, handleNavigation);
+  }
+
+  // Инициализировать ProgressBar
+  const progressBarContainer = document.getElementById('progress-bar-container');
+  if (progressBarContainer) {
+    progressBar = new ProgressBar(progressBarContainer, currentBook, currentChapter);
+  }
+
+  // Инициализировать Breadcrumbs
+  const breadcrumbsContainer = document.getElementById('breadcrumbs-container');
+  if (breadcrumbsContainer) {
+    breadcrumbs = new Breadcrumbs(breadcrumbsContainer, currentBook, currentChapter);
+  }
+
+  // Инициализировать Bottom Navigation (Mobile)
+  const bottomNavContainer = document.getElementById('bottom-nav-container');
+  if (bottomNavContainer) {
+    bottomNav = new BottomNav(bottomNavContainer, currentBook, currentChapter, handleNavigation);
+  }
+
   // Отобразить главу
   displayChapter(currentBook, currentChapter);
-  
+
   // Инициализировать десктопный селектор перевода
   const translationContainer = document.getElementById('translation-selector');
   if (translationContainer) {
     translationSelector = new TranslationSelector(translationContainer, handleTranslationChange, false);
   }
-  
+
   // Инициализировать мобильный селектор перевода (показываем только на мобильных)
   const mobileTranslationContainer = document.getElementById('mobile-translation-selector');
   if (mobileTranslationContainer && window.innerWidth < 768) {
     mobileTranslationContainer.classList.remove('hidden');
     const mobileSelector = new TranslationSelector(mobileTranslationContainer, handleTranslationChange, true);
   }
-  
+
   // Обработка изменения размера окна
   window.addEventListener('resize', () => {
     if (mobileTranslationContainer) {
@@ -90,6 +122,26 @@ async function displayChapter(book, chapter, forceRefresh = false) {
       navigation = new Navigation(navContainer, book, chapter, handleNavigation);
     }
     
+    // Обновить Sidebar
+    if (sidebar) {
+      sidebar.update(book, chapter);
+    }
+
+    // Обновить ProgressBar
+    if (progressBar) {
+      progressBar.update(book, chapter);
+    }
+
+    // Обновить Breadcrumbs
+    if (breadcrumbs) {
+      breadcrumbs.update(book, chapter);
+    }
+
+    // Обновить Bottom Navigation
+    if (bottomNav) {
+      bottomNav.update(book, chapter);
+    }
+
     // Создать или обновить мобильную навигацию
     const mobileNavButton = document.getElementById('mobile-nav-button');
     if (mobileNavigation) {
@@ -97,7 +149,7 @@ async function displayChapter(book, chapter, forceRefresh = false) {
     } else if (mobileNavButton) {
       mobileNavigation = new MobileNavigation(mobileNavButton, book, chapter, handleNavigation);
     }
-    
+
     // Создать или обновить читалку
     const readerContainer = document.getElementById('bible-reader-container');
     if (bibleReader) {
@@ -106,7 +158,7 @@ async function displayChapter(book, chapter, forceRefresh = false) {
       bibleReader = new BibleReader(readerContainer, verses, book, chapter);
       bibleReader.onWordClick = handleWordClick;
     }
-    
+
     // Обновить title страницы
     document.title = `${getBookName(book, BIBLE_BOOKS)} ${chapter} - Живая Библия`;
     

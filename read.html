@@ -45,30 +45,57 @@
         </div>
     </nav>
 
+    <!-- Progress Bar -->
+    <div id="progress-bar-container"></div>
+
+    <!-- Main Layout with Sidebar -->
     <div class="min-h-screen bg-white">
-        <div class="container mx-auto px-6 py-12 md:py-16">
-            <!-- Chapter header - Минималистичный стиль -->
-            <div class="text-center mb-12 md:mb-16">
-                <div class="inline-block mb-6">
-                    <div class="px-6 py-2 bg-warm-white rounded-full border border-light-gray">
-                        <span id="chapter-label" class="text-sm font-medium text-text-secondary"></span>
+        <div class="flex">
+            <!-- Sidebar (Desktop only) -->
+            <div id="sidebar-container" class="sidebar-wrapper"></div>
+
+            <!-- Main Content -->
+            <main class="flex-1 min-w-0">
+                <div class="container mx-auto px-6 py-8 lg:py-12 max-w-5xl">
+                    <!-- Breadcrumbs -->
+                    <div id="breadcrumbs-container"></div>
+
+                    <!-- Chapter Header - Более компактный -->
+                    <div class="mb-8 lg:mb-12">
+                        <h1 id="book-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary mb-6 tracking-tight"></h1>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                            <div class="inline-flex items-center gap-3">
+                                <div class="px-4 py-1.5 bg-warm-white rounded-lg border border-light-gray">
+                                    <span id="chapter-label" class="text-sm font-medium text-text-secondary"></span>
+                                </div>
+
+                                <!-- Translation selector -->
+                                <div id="translation-selector">
+                                    <!-- Translation selector will be inserted here -->
+                                </div>
+                            </div>
+
+                            <!-- Desktop Navigation (скрыта на мобильных) -->
+                            <div id="navigation-container" class="hidden lg:block">
+                                <!-- Navigation will be inserted here by JS -->
+                            </div>
+                        </div>
+
+                        <div class="w-16 h-0.5 bg-light-gray rounded-full"></div>
+                    </div>
+
+                    <!-- Bible Reader -->
+                    <div id="bible-reader-container" class="prose prose-lg max-w-none">
+                        <!-- Content will be loaded by JS -->
                     </div>
                 </div>
-                <h1 id="book-title" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-text-primary mb-8 tracking-tight"></h1>
-
-                <!-- Translation selector -->
-                <div id="translation-selector" class="flex justify-center mb-8">
-                    <!-- Translation selector will be inserted here -->
-                </div>
-                <div class="w-16 h-0.5 bg-light-gray mx-auto rounded-full"></div>
-            </div>
-
-            <!-- Bible Reader - Увеличенный spacing и воздух -->
-            <div id="bible-reader-container" class="max-w-3xl mx-auto bg-white rounded-2xl shadow-minimal p-8 sm:p-10 md:p-12 lg:p-16">
-                <!-- Content will be loaded by JS -->
-            </div>
+            </main>
         </div>
     </div>
+
+    <!-- Bottom Navigation (Mobile only) -->
+    <div id="bottom-nav-container"></div>
 
     <!-- Scripts -->
     <script type="module" src="js/pages/read.js"></script>

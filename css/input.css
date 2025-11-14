@@ -74,6 +74,64 @@ mark {
   border-bottom: 1px solid rgba(231, 229, 228, 0.5);
 }
 
+/* Sidebar Layout */
+.sidebar-wrapper {
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-wrapper {
+    width: 300px;
+  }
+
+  .sidebar-desktop.collapsed {
+    width: 60px;
+  }
+
+  .sidebar-desktop.collapsed + main {
+    margin-left: 0;
+  }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Progress Bar */
+.progress-bar-wrapper {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Prose styles for Bible Reader */
+.prose {
+  @apply text-text-primary;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed text-verse;
+}
+
+.prose .verse {
+  @apply inline-block;
+}
+
+/* Tabs */
+.library-tab {
+  @apply text-text-secondary;
+}
+
+.library-tab.active {
+  @apply bg-accent-warm text-white shadow-minimal;
+}
+
+.library-tab:not(.active):hover {
+  @apply bg-warm-white text-text-primary;
+}
+
 /* Mobile optimizations */
 @layer utilities {
   /* Touch targets - минимум 44x44px для удобного взаимодействия */

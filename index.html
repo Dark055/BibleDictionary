@@ -159,14 +159,39 @@
         </div>
     </section>
 
-    <!-- Library - Будет заполнено через JS -->
+    <!-- Library - С tabs для удобной навигации -->
     <section id="library" class="py-22 px-6 bg-warm-white">
         <div class="container mx-auto max-w-6xl">
-            <div class="text-center mb-16">
+            <div class="text-center mb-12">
                 <h2 class="text-4xl sm:text-5xl md:text-6xl font-serif font-semibold mb-4 text-text-primary">Библиотека книг</h2>
-                <p class="text-text-secondary text-xl">Выберите книгу для начала изучения</p>
+                <p class="text-text-secondary text-xl mb-8">Выберите книгу для начала изучения</p>
+
+                <!-- Tabs -->
+                <div class="flex justify-center mb-8">
+                    <div class="inline-flex bg-white rounded-xl p-1 shadow-minimal border border-light-gray">
+                        <button
+                            data-tab="all"
+                            class="library-tab px-6 py-2.5 rounded-lg font-medium text-sm transition-all active"
+                        >
+                            Все книги
+                        </button>
+                        <button
+                            data-tab="ot"
+                            class="library-tab px-6 py-2.5 rounded-lg font-medium text-sm transition-all"
+                        >
+                            Ветхий Завет
+                        </button>
+                        <button
+                            data-tab="nt"
+                            class="library-tab px-6 py-2.5 rounded-lg font-medium text-sm transition-all"
+                        >
+                            Новый Завет
+                        </button>
+                    </div>
+                </div>
             </div>
 
+            <!-- Books Content -->
             <div id="books-library" class="space-y-8">
                 <!-- Заполняется через home.js -->
             </div>
