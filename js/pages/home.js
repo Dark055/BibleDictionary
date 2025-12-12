@@ -122,7 +122,7 @@ function renderFeatures() {
       description: 'Удобный переход между книгами, главами и стихами'
     }
   ];
-  
+
   const featuresGrid = document.getElementById('features-grid');
   if (featuresGrid) {
     featuresGrid.innerHTML = features.map(feature => `
@@ -160,40 +160,28 @@ function renderBooksLibrary() {
     const sectionBooks = BIBLE_BOOKS.slice(section.start - 1, section.end);
 
     return `
-      <div class="bg-white rounded-2xl p-8 border border-light-gray shadow-minimal">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 pb-4 border-b border-light-gray gap-3">
-          <div>
-            <h3 class="text-2xl font-serif font-semibold text-text-primary mb-1">
-              ${section.name}
-            </h3>
-            <p class="text-sm text-text-muted">
-              ${getSectionDescription(section.name)}
-            </p>
-          </div>
-          <span class="px-4 py-1.5 bg-warm-white text-text-secondary rounded-full text-sm font-medium whitespace-nowrap">
+      <div class="bg-white rounded-xl p-4 border border-light-gray shadow-minimal">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-light-gray">
+          <h3 class="text-lg font-serif font-semibold text-text-primary">
+            ${section.name}
+          </h3>
+          <span class="px-2.5 py-1 bg-warm-white text-text-secondary rounded-full text-xs font-medium whitespace-nowrap">
             ${sectionBooks.length} ${sectionBooks.length === 1 ? 'книга' : 'книг'}
           </span>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div class="flex flex-wrap gap-1.5">
           ${sectionBooks.map((book, idx) => {
-            const bookNum = section.start + idx;
-            return `
+      const bookNum = section.start + idx;
+      return `
               <a
                 href="read.html?book=${bookNum}&chapter=1"
-                class="group px-4 py-4 bg-warm-white hover:bg-accent-warm hover:text-white border border-light-gray rounded-xl transition-all duration-300 hover:shadow-minimal-md hover-float"
+                class="library-tab px-6 py-2.5 rounded-lg font-medium text-sm transition-all text-text-secondary hover:bg-accent-warm hover:text-white"
               >
-                <div class="flex items-center justify-between">
-                  <span class="font-serif font-medium text-text-primary group-hover:text-white transition-colors">
-                    ${book}
-                  </span>
-                  <svg class="w-4 h-4 text-text-secondary group-hover:text-white opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+                ${book}
               </a>
             `;
-          }).join('')}
+    }).join('')}
         </div>
       </div>
     `;

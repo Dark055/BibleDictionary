@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,37 +8,47 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <style>
-        .font-serif { font-family: 'Lora', serif; }
-        .font-sans { font-family: 'Inter', sans-serif; }
+        .font-serif {
+            font-family: 'Lora', serif;
+        }
+
+        .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
+
 <body class="font-sans bg-gradient-to-b from-off-white to-white text-text-primary">
     <!-- Navigation - Минималистичная светлая навигация -->
     <nav class="glass-nav shadow-minimal sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4">
+        <div class="w-full px-6 py-4">
             <div class="flex items-center justify-between">
-                <a href="index.html" class="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition">
-                    <span class="text-2xl sm:text-3xl">📖</span>
-                    <h1 class="text-lg sm:text-xl md:text-2xl font-serif font-semibold text-text-primary">Живая Библия</h1>
+                <a href="index.html" class="flex items-center hover:opacity-80 transition">
+                    <h1 class="text-lg sm:text-xl md:text-2xl font-serif font-semibold text-text-primary">Главная</h1>
                 </a>
-                
+
                 <!-- Desktop Navigation -->
-                <div id="navigation-container" class="hidden md:flex flex-1 items-center justify-center ml-2 sm:ml-4">
+                <div id="navigation-container" class="hidden md:flex items-center justify-end ml-auto">
                     <!-- Navigation will be inserted here by JS -->
                 </div>
-                
+
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center gap-2">
                     <!-- Mobile Translation Selector -->
                     <div id="mobile-translation-selector" class="hidden">
                         <!-- Mobile translation selector will be inserted here -->
                     </div>
-                    
-                    <button id="mobile-nav-button" class="text-text-primary p-2 hover:text-accent-warm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation" aria-label="Открыть навигацию">
+
+                    <button id="mobile-nav-button"
+                        class="text-text-primary p-2 hover:text-accent-warm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
+                        aria-label="Открыть навигацию">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
                 </div>
@@ -46,7 +57,6 @@
     </nav>
 
     <!-- Progress Bar -->
-    <div id="progress-bar-container"></div>
 
     <!-- Main Layout with Sidebar -->
     <div class="min-h-screen bg-white">
@@ -62,7 +72,9 @@
 
                     <!-- Chapter Header - Более компактный -->
                     <div class="mb-8 lg:mb-12">
-                        <h1 id="book-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary mb-6 tracking-tight"></h1>
+                        <h1 id="book-title"
+                            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary mb-6 tracking-tight">
+                        </h1>
 
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                             <div class="inline-flex items-center gap-3">
@@ -100,4 +112,5 @@
     <!-- Scripts -->
     <script type="module" src="js/pages/read.js"></script>
 </body>
+
 </html>
