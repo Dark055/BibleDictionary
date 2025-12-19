@@ -8,6 +8,8 @@ export class ProgressBar {
     this.currentBook = Number(currentBook) || 1;
     this.currentChapter = Number(currentChapter) || 1;
     this.scrollProgress = 0;
+    this._scrollHandler = null;
+    this._scrollInitTimeoutId = null;
 
     this.render();
     this.attachScrollListener();
@@ -61,6 +63,15 @@ export class ProgressBar {
   }
 
   attachScrollListener() {
+    if (this._scrollHandler) {
+      window.removeEventListener('scroll', this._scrollHandler);
+      this._scrollHandler = null;
+    }
+    if (this._scrollInitTimeoutId) {
+      clearTimeout(this._scrollInitTimeoutId);
+      this._scrollInitTimeoutId = null;
+    }
+
     // Обновлять scroll progress при скролле
     let ticking = false;
 
@@ -90,17 +101,18 @@ export class ProgressBar {
       ticking = false;
     };
 
-    window.addEventListener('scroll', () => {
+    this._scrollHandler = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           updateScrollProgress();
         });
         ticking = true;
       }
-    });
+    };
 
-    // Первоначальное обновление
-    setTimeout(updateScrollProgress, 500);
+    window.addEventListener('scroll', this._scrollHandler);
+
+    this._scrollInitTimeoutId = setTimeout(updateScrollProgress, 500);
   }
 
   update(book, chapter) {
@@ -112,7 +124,13 @@ export class ProgressBar {
   }
 
   destroy() {
-    // Удалить слушатели событий если нужно
-    window.removeEventListener('scroll', this.attachScrollListener);
+    if (this._scrollHandler) {
+      window.removeEventListener('scroll', this._scrollHandler);
+      this._scrollHandler = null;
+    }
+    if (this._scrollInitTimeoutId) {
+      clearTimeout(this._scrollInitTimeoutId);
+      this._scrollInitTimeoutId = null;
+    }
   }
 }

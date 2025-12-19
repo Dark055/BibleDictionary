@@ -4,6 +4,7 @@ import { BIBLE_BOOKS, API_BASE_URL } from '../config.js';
 import { searchBible } from '../api-client.js';
 import { searchVerses as searchBollsVerses } from '../bolls-api.js';
 import { getCurrentTranslation } from '../bible-service.js';
+import { escapeRegex } from '../utils.js';
 
 export class Search {
   constructor(container) {
@@ -17,7 +18,6 @@ export class Search {
     this.offline = false;
     
     this.render();
-    this.attachEvents();
   }
   
   render() {
@@ -359,7 +359,7 @@ export class Search {
         if (end < text.length) snippet = snippet + '...';
         
         const highlightedSnippet = snippet.replace(
-          new RegExp(query, 'gi'),
+          new RegExp(escapeRegex(query), 'gi'),
           match => `<mark class="bg-accent-warm/20 text-accent-warm font-medium px-1 rounded">${match}</mark>`
         );
         

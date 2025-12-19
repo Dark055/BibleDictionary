@@ -9,7 +9,6 @@ import { BibleReader } from '../components/BibleReader.js';
 import { WordTooltip } from '../components/WordTooltip.js';
 import { TranslationSelector } from '../components/TranslationSelector.js';
 import { Sidebar } from '../components/Sidebar.js';
-import { ProgressBar } from '../components/ProgressBar.js';
 import { Breadcrumbs } from '../components/Breadcrumbs.js';
 import { BottomNav } from '../components/BottomNav.js';
 
@@ -21,7 +20,6 @@ let bibleReader = null;
 let currentTooltip = null;
 let translationSelector = null;
 let sidebar = null;
-let progressBar = null;
 let breadcrumbs = null;
 let bottomNav = null;
 
@@ -46,12 +44,6 @@ async function init() {
   const sidebarContainer = document.getElementById('sidebar-container');
   if (sidebarContainer) {
     sidebar = new Sidebar(sidebarContainer, currentBook, currentChapter, handleNavigation);
-  }
-
-  // Инициализировать ProgressBar
-  const progressBarContainer = document.getElementById('progress-bar-container');
-  if (progressBarContainer) {
-    progressBar = new ProgressBar(progressBarContainer, currentBook, currentChapter);
   }
 
   // Инициализировать Breadcrumbs
@@ -125,11 +117,6 @@ async function displayChapter(book, chapter, forceRefresh = false) {
     // Обновить Sidebar
     if (sidebar) {
       sidebar.update(book, chapter);
-    }
-
-    // Обновить ProgressBar
-    if (progressBar) {
-      progressBar.update(book, chapter);
     }
 
     // Обновить Breadcrumbs

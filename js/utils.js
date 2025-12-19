@@ -6,25 +6,30 @@
 export function getUrlParams() {
   const params = {};
   const hash = window.location.hash.slice(1);
-  const queryString = window.location.search.slice(1);
+  const searchParams = new URLSearchParams(window.location.search);
   
   // Парсим query параметры (?book=1&chapter=1)
-  if (queryString) {
-    const queryPairs = queryString.split('&');
-    queryPairs.forEach(pair => {
-      const [key, value] = pair.split('=');
-      if (key && value) {
-        params[decodeURIComponent(key)] = decodeURIComponent(value);
-      }
-    });
+  searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
+
+  if (typeof params.translation === 'string' && params.translation.includes('/read/')) {
+    const matches = Array.from(params.translation.matchAll(/\/read\/(\d+)\/(\d+)/g));
+    const last = matches[matches.length - 1];
+    if (last) {
+      params.book = parseInt(last[1], 10);
+      params.chapter = parseInt(last[2], 10);
+      params.translation = params.translation.split('/')[0];
+    }
   }
   
   // Парсим hash параметры (#/read/1/1)
   if (hash) {
-    const parts = hash.split('/');
+    const route = hash.startsWith('/') ? hash.slice(1) : hash;
+    const parts = route.split('/');
     if (parts[0] === 'read' && parts[1] && parts[2]) {
-      params.book = parseInt(parts[1]);
-      params.chapter = parseInt(parts[2]);
+      params.book = parseInt(parts[1], 10);
+      params.chapter = parseInt(parts[2], 10);
     }
   }
   
@@ -35,22 +40,34 @@ export function getUrlParams() {
  * Обновить URL без перезагрузки страницы
  */
 export function updateUrl(book, chapter, translation = null) {
-  const hash = `/read/${book}/${chapter}`;
   const params = new URLSearchParams(window.location.search);
+
+  const currentBook = params.get('book');
+  const currentChapter = params.get('chapter');
+  const currentHash = window.location.hash || '';
+
+  params.set('book', String(book));
+  params.set('chapter', String(chapter));
   
   if (translation) {
     params.set('translation', translation);
   }
   
+  const keepHash = currentHash.startsWith('#v') &&
+    String(book) === String(currentBook) &&
+    String(chapter) === String(currentChapter);
+
   const queryString = params.toString();
-  const newUrl = `${window.location.pathname}${queryString ? '?' + queryString : ''}${hash}`;
+  const newUrl = `${window.location.pathname}${queryString ? '?' + queryString : ''}${keepHash ? currentHash : ''}`;
   
   window.history.replaceState(null, '', newUrl);
 }
 
 export function getTranslationFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('translation');
+  const t = params.get('translation');
+  if (!t) return null;
+  return t.split('/')[0];
 }
 
 /**

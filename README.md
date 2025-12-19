@@ -43,7 +43,6 @@
 
 ### Backend (альтернативный, для локальной разработки)
 - **Express**: `server/server.js` (раздаёт статику + API).
-- **MongoDB** (опционально): кеш определений слов.
 
 ### Внешние API
 - **Bolls.life API**: тексты глав/список книг/поиск (фоллбек).
@@ -99,10 +98,6 @@ npm run serve:dev
 
 Требования к конфигу:
 - переменные в `.env` (см. раздел 5)
-- если включён MongoDB‑кеш — нужен `MONGODB_URI`
-
-Важно:
-- В текущем репозитории код Express использует пакет `mongodb` (`server/lib/mongodb.js`). Если он не установлен, запуск упадёт. В таком случае установи зависимость вручную.
 
 ### 3.6 Режим «только фронтенд» (без API)
 ```bash
@@ -137,7 +132,7 @@ npm start
 - `GEMINI_API_KEY` — ключ Gemini.
 
 Опциональные:
-- `GEMINI_API_URL` — URL модели (в коде есть дефолт на `gemini-2.5-flash:generateContent`).
+- `GEMINI_API_URL` — URL модели (дефолт: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`).
 
 Локально (wrangler dev):
 - использовать файл `.dev.vars`.

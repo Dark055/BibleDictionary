@@ -18,8 +18,54 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const corsAllowOrigins = (process.env.CORS_ALLOW_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, false);
+    if (corsAllowOrigins.includes('*')) return callback(null, true);
+    if (corsAllowOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  optionsSuccessStatus: 204,
+};
+
+const wordRateLimit = new Map();
+function wordRateLimitMiddleware(req, res, next) {
+  const limit = Number.parseInt(process.env.WORD_RATE_LIMIT || '30', 10);
+  const windowSeconds = Number.parseInt(process.env.WORD_RATE_LIMIT_WINDOW || '60', 10);
+
+  if (!Number.isFinite(limit) || !Number.isFinite(windowSeconds) || limit <= 0 || windowSeconds <= 0) {
+    return next();
+  }
+
+  const now = Date.now();
+  const windowId = Math.floor(now / (windowSeconds * 1000));
+  const ip = (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim() || req.ip || 'unknown';
+  const entry = wordRateLimit.get(ip);
+
+  if (!entry || entry.windowId !== windowId) {
+    wordRateLimit.set(ip, { windowId, count: 1 });
+    return next();
+  }
+
+  if (entry.count >= limit) {
+    const retryAfterSeconds = Math.max(1, windowSeconds - Math.floor((now / 1000) % windowSeconds));
+    res.set('Retry-After', String(retryAfterSeconds));
+    return res.status(429).json({ error: 'Rate limit exceeded' });
+  }
+
+  entry.count += 1;
+  return next();
+}
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Раздача статических файлов (HTML, CSS, JS)
@@ -32,7 +78,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
-app.use('/api/word', wordRouter);
+app.use('/api/word', wordRateLimitMiddleware, wordRouter);
 app.use('/api/search', searchRouter);
 
 // Health check endpoint

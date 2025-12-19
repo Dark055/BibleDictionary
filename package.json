@@ -5,9 +5,10 @@
   "description": "Interactive Bible study app with multiple translations and AI analysis",
   "main": "index.html",
   "scripts": {
-    "dev": "wrangler pages dev . --kv WORDS_KV --compatibility-date=2024-01-01",
-    "deploy": "npm run build:css && wrangler pages deploy .",
+    "dev": "npm run build:css && npm run build:dist && wrangler pages dev dist --kv WORDS_KV --compatibility-date=2024-01-01",
+    "deploy": "npm run build:css && npm run build:dist && wrangler pages deploy dist",
     "build:css": "tailwindcss -i ./css/input.css -o ./css/styles.css",
+    "build:dist": "node scripts/build-dist.js",
     "watch:css": "tailwindcss -i ./css/input.css -o ./css/styles.css --watch",
     "start": "npx live-server --port=8080",
     "serve": "node server/server.js",

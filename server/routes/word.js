@@ -1,7 +1,6 @@
 // server/routes/word.js - Word definition API route
 
 import express from 'express';
-import getClientPromise from '../lib/mongodb.js';
 import { getWordDefinition } from '../lib/openrouter.js';
 import { getWordDefinitionGemini } from '../lib/gemini.js';
 
@@ -76,23 +75,8 @@ router.post('/', async (req, res) => {
       return res.json(memCached);
     }
     
-    const client = await getClientPromise();
-    const db = client.db('bible-app');
-    const collection = db.collection('words');
-    
-    const existing = await collection.findOne({
-      word: sanitizedWord.toLowerCase(),
-      verse_ref: sanitizedVerseRef
-    });
-    
-    if (existing) {
-      console.log(`DB cache hit: ${sanitizedWord} in ${sanitizedVerseRef}`);
-      setToMemCache(cacheKey, existing);
-      return res.json(existing);
-    }
-    
     console.log(`Cache miss - generating definition for: ${sanitizedWord} in ${sanitizedVerseRef}`);
-    
+  
     // Choose API provider based on environment variable
     const useGemini = process.env.USE_GEMINI === 'true' || process.env.GEMINI_API_KEY;
     let aiDefinition;
@@ -121,7 +105,6 @@ router.post('/', async (req, res) => {
       created_at: new Date()
     };
     
-    await collection.insertOne(newDefinition);
     setToMemCache(cacheKey, newDefinition);
     
     console.log(`Definition saved for: ${sanitizedWord}`);

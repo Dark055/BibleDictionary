@@ -2,6 +2,112 @@ import { parseReference, highlightText } from './shared/bible-utils.js';
 
 let bibleDataCache = null;
 
+const inMemoryRateLimit = new Map();
+
+function parseNonNegativeInt(value, fallback) {
+  const n = Number.parseInt(String(value), 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+function parseCorsAllowOrigins(env) {
+  const raw = env?.CORS_ALLOW_ORIGINS;
+  if (!raw) return [];
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function resolveAllowedOrigin(requestOrigin, urlOrigin, allowList) {
+  if (!requestOrigin) return null;
+  if (allowList.includes('*')) return '*';
+  if (requestOrigin === urlOrigin) return requestOrigin;
+  if (allowList.includes(requestOrigin)) return requestOrigin;
+  return null;
+}
+
+function getCorsHeaders(request, env) {
+  const url = new URL(request.url);
+  const requestOrigin = request.headers.get('Origin');
+  const allowList = parseCorsAllowOrigins(env);
+  const allowedOrigin = resolveAllowedOrigin(requestOrigin, url.origin, allowList);
+
+  if (!allowedOrigin) return {};
+
+  const requestHeaders = request.headers.get('Access-Control-Request-Headers');
+  const headers = {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': requestHeaders || 'Content-Type',
+  };
+
+  if (allowedOrigin !== '*') {
+    headers['Vary'] = 'Origin';
+  }
+
+  return headers;
+}
+
+function getClientIp(request) {
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp;
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0].trim();
+  return 'unknown';
+}
+
+function sanitizeWord(value) {
+  const raw = String(value || '').trim();
+  const cleaned = raw.replace(/[^\p{L}\p{M}'’-]/gu, '');
+  return cleaned.slice(0, 50);
+}
+
+function sanitizeVerseRef(value) {
+  return String(value || '').trim().slice(0, 100);
+}
+
+function sanitizeContext(value) {
+  return String(value || '').trim().slice(0, 500);
+}
+
+async function checkWordRateLimit(request, env) {
+  const limit = parseNonNegativeInt(env?.WORD_RATE_LIMIT, 30);
+  const windowSeconds = parseNonNegativeInt(env?.WORD_RATE_LIMIT_WINDOW, 60);
+
+  if (!limit || !windowSeconds) {
+    return { allowed: true };
+  }
+
+  const now = Date.now();
+  const ip = getClientIp(request);
+  const windowId = Math.floor(now / (windowSeconds * 1000));
+  const key = `rl:word:${ip}:${windowId}`;
+
+  if (env?.WORDS_KV) {
+    const currentRaw = await env.WORDS_KV.get(key);
+    const current = currentRaw ? Number.parseInt(currentRaw, 10) : 0;
+
+    if (Number.isFinite(current) && current >= limit) {
+      const retryAfterSeconds = Math.max(1, windowSeconds - Math.floor((now / 1000) % windowSeconds));
+      return { allowed: false, retryAfterSeconds };
+    }
+
+    const next = (Number.isFinite(current) ? current : 0) + 1;
+    await env.WORDS_KV.put(key, String(next), { expirationTtl: windowSeconds + 5 });
+    return { allowed: true };
+  }
+
+  const entry = inMemoryRateLimit.get(key);
+  if (entry && entry.expiresAt > now) {
+    if (entry.count >= limit) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((entry.expiresAt - now) / 1000));
+      return { allowed: false, retryAfterSeconds };
+    }
+    entry.count += 1;
+    return { allowed: true };
+  }
+
+  inMemoryRateLimit.set(key, { count: 1, expiresAt: now + windowSeconds * 1000 });
+  return { allowed: true };
+}
+
 async function loadBibleData(request, env) {
   if (bibleDataCache) return bibleDataCache;
 
@@ -95,7 +201,7 @@ async function handleSearch(request, env) {
 
 async function getWordDefinition(word, context, env) {
   const geminiKey = env?.GEMINI_API_KEY;
-  const geminiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  const geminiUrl = env?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
   if (!geminiKey) {
     throw new Error('GEMINI_API_KEY must be set as a Worker secret');
@@ -177,61 +283,96 @@ async function handleWord(request, env) {
       return new Response('Method not allowed', { status: 405 });
     }
 
-    const { word, verseRef, verseContext } = await request.json();
-  
-  if (!word || !verseRef) {
-    return new Response(JSON.stringify({
-      error: 'Missing required fields: word, verseRef'
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-  
-  const cacheKey = `word:${word.toLowerCase()}:${verseRef}`;
-  
-  // KV кэш доступен только в продакшене
-  if (env?.WORDS_KV) {
-    const cached = await env.WORDS_KV.get(cacheKey, 'json');
-    if (cached) {
-      console.log(`Cache hit for word: ${word} in ${verseRef}`);
-      return new Response(JSON.stringify(cached), {
+    const contentLength = Number.parseInt(request.headers.get('content-length') || '', 10);
+    if (Number.isFinite(contentLength) && contentLength > 10000) {
+      return new Response(JSON.stringify({
+        error: 'Request too large'
+      }), {
+        status: 413,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-  }
-  
-  console.log(`Cache miss - generating definition for: ${word} in ${verseRef}`);
-  
-  const aiDefinition = await getWordDefinition(word, verseContext || '', env);
-  
-  if (!aiDefinition) {
-    return new Response(JSON.stringify({
-      error: 'Failed to generate definition'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-  
-  const newDefinition = {
-    word: word.toLowerCase(),
-    verse_ref: verseRef,
-    greek_hebrew: aiDefinition.greek_hebrew,
-    explanations: aiDefinition.explanations,
-    ai_generated: true,
-    verified: false,
-    created_at: new Date().toISOString()
-  };
-  
-  // Сохранить в KV, если доступен
-  if (env?.WORDS_KV) {
-    await env.WORDS_KV.put(cacheKey, JSON.stringify(newDefinition));
-    console.log(`Definition saved for: ${word}`);
-  } else {
-    console.log(`Definition generated for: ${word} (not cached - KV not available)`);
-  }
-  
+
+    const rate = await checkWordRateLimit(request, env);
+    if (!rate.allowed) {
+      return new Response(JSON.stringify({
+        error: 'Rate limit exceeded'
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rate.retryAfterSeconds || 60)
+        }
+      });
+    }
+
+    let payload;
+    try {
+      payload = await request.json();
+    } catch {
+      return new Response(JSON.stringify({
+        error: 'Invalid JSON'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const word = sanitizeWord(payload?.word);
+    const verseRef = sanitizeVerseRef(payload?.verseRef);
+    const verseContext = sanitizeContext(payload?.verseContext);
+
+    if (!word || !verseRef) {
+      return new Response(JSON.stringify({
+        error: 'Missing required fields: word, verseRef'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const cacheKey = `word:${word.toLowerCase()}:${verseRef}`;
+
+    if (env?.WORDS_KV) {
+      const cached = await env.WORDS_KV.get(cacheKey, 'json');
+      if (cached) {
+        console.log(`Cache hit for word: ${word} in ${verseRef}`);
+        return new Response(JSON.stringify(cached), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    console.log(`Cache miss - generating definition for: ${word} in ${verseRef}`);
+
+    const aiDefinition = await getWordDefinition(word, verseContext, env);
+
+    if (!aiDefinition || typeof aiDefinition !== 'object' || !aiDefinition.explanations) {
+      return new Response(JSON.stringify({
+        error: 'Failed to generate definition'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const newDefinition = {
+      word: word.toLowerCase(),
+      verse_ref: verseRef,
+      greek_hebrew: aiDefinition.greek_hebrew,
+      explanations: aiDefinition.explanations,
+      ai_generated: true,
+      verified: false,
+      created_at: new Date().toISOString()
+    };
+
+    if (env?.WORDS_KV) {
+      await env.WORDS_KV.put(cacheKey, JSON.stringify(newDefinition));
+      console.log(`Definition saved for: ${word}`);
+    } else {
+      console.log(`Definition generated for: ${word} (not cached - KV not available)`);
+    }
+
     return new Response(JSON.stringify(newDefinition), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -239,8 +380,7 @@ async function handleWord(request, env) {
     console.error('handleWord Error:', error);
     return new Response(JSON.stringify({
       error: 'Internal Server Error',
-      message: error.message,
-      stack: error.stack
+      message: error.message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -253,14 +393,10 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
+    const corsHeaders = getCorsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     try {
